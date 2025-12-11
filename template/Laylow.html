@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/Laylow.css">
+    <title>Api Spotify - Albums Damso</title>
+</head>
+
+<body>
+    <nav>
+        <div class="menu-item" id="logo">
+            <a href="/assets/img/spotify-logo.png"><img id="SpotifyLogo" src="/assets/img/spotify-logo.png" alt="Spotify Logo"></a>
+        </div>
+        <div class="menu-item" id="home"><a href="/">Home</a></div>
+    </nav>
+
+    <div>
+        <div class="container-Artist">
+            <div class="image-container">
+            <img class="image" src="/assets/img/Laylow.png" alt="Photo de Laylow">
+            </div>
+            <div>
+                <h1>Laylow</h1>
+                <p class="text-White">Laylow, de son vrai nom Julien Allouf, est un rappeur et producteur français originaire de Toulouse. Il s'est fait connaître grâce à son style unique mêlant rap, trap et influences électroniques. Laylow est reconnu pour ses textes introspectifs et son univers visuel soigné, souvent inspiré par la science-fiction et les technologies futuristes. Depuis ses débuts, il a sorti plusieurs projets acclamés par la critique, dont "Trinity" et "L'étrange histoire de Mr. Anderson".</p>
+            </div>
+        </div>
+
+        <div>
+            <div>
+                <h2 class="text-container">Titre</h2>
+            </div>
+
+            <div class="albums">
+                <div class="album-card">
+                    <div>
+                    <img src="{{.TrackData.AlbumImage}}" alt="Image album" class="album-image">
+                    </div>
+                    <div>
+                    <p><strong>Nom de la musique:</strong></p>
+                    <p class="text-White">{{.TrackData.TrackName}}</p>
+                    <p><strong>Nom de l'artiste:</strong></p>
+                    <p class="text-White">{{.TrackData.ArtistName}}</p>
+                    <p><strong>Date de sortie :</strong></p>
+                    <p class="text-White">{{.TrackData.AlbumRelease}}</p>
+                    <p><strong>Album :</strong></p>
+                    <p class="text-White">{{.TrackData.AlbumName}}</p>
+                    <p><strong>URL Spotify :</strong>
+                        <a href="{{.TrackData.AlbumURL}}" target="_blank">Ouvrir</a> <!-- target="_blank" = indique qu'il doit ouvrir le lien avec un nouvel onglet-->
+                    </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
