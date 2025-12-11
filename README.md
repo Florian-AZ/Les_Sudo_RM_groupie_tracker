@@ -16,3 +16,24 @@ Dans le répertoire `site web`, exécutez l'application Go dans le terminal :
 go run main.go
 ```
 >L'application sera accessible à l'adresse suivante : `http://localhost:8080`
+
+Un site internet sobre avec comme page:
+
+Accueil : Description du projet plus bouton de redirection vers la page de recherche.
+
+Page de recherche: Barre de recherche en haut avec en dessous 6 bulles de catégorie de musique (rock, metal, pop, etc.), si recherche alors les bulles disparaissent laissant place aux résultat.
+
+Page Artiste: donnée de l'artiste, album, titre populaire, related artist.
+
+Page Album: titre dans l'album
+
+Page Titre: info titre, piste de lecture
+
+Page Favoris: regroupe tout les titres favoris de l'utilisateur
+
+Page Connexion : login ou inscription
+
+Menu burger : regroupe les pages inscription + recherche + accueil + favoris
+
+
+
