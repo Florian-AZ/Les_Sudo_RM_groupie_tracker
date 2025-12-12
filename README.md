@@ -37,3 +37,53 @@ Menu burger : regroupe les pages inscription + recherche + accueil + favoris
 
 
 
+- Donnée à récupérer:
+    https://api.spotify.com/v1/search
+    tracks
+        items
+            album
+                external_urls
+                    spotify
+                id
+                images[1]
+                    url
+                name
+                release_date
+                total_tracks
+            artists[]
+                external_urls
+                    spotify
+                id
+                name
+            duration_ms
+            external_urls
+                spotify
+            id
+            name
+    artists
+        items
+            external_urls
+                spotify
+            folowers
+                total
+            genres[]
+            id
+            images[1]
+                url
+            name
+    albums
+        items
+            total_tracks
+            external_urls
+                spotify
+            id
+            images[1]
+                url
+            name
+            release_date
+            artists[]
+                external_urls
+                    spotify
+                id
+                name
+                
