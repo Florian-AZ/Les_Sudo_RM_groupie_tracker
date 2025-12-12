@@ -37,10 +37,11 @@ Menu burger : regroupe les pages inscription + recherche + accueil + favoris
 
 
 
-- Donnée à récupérer:
-    https://api.spotify.com/v1/search
+# Donnée à récupérer:
+    
+- https://api.spotify.com/v1/search
     tracks
-        items
+        items[]
             album
                 external_urls
                     spotify
@@ -61,7 +62,7 @@ Menu burger : regroupe les pages inscription + recherche + accueil + favoris
             id
             name
     artists
-        items
+        items[]
             external_urls
                 spotify
             folowers
@@ -72,7 +73,7 @@ Menu burger : regroupe les pages inscription + recherche + accueil + favoris
                 url
             name
     albums
-        items
+        items[]
             total_tracks
             external_urls
                 spotify
@@ -86,4 +87,28 @@ Menu burger : regroupe les pages inscription + recherche + accueil + favoris
                     spotify
                 id
                 name
-                
+- https://api.spotify.com/v1/artists/{id}
+    external_urls
+        spotify
+    followers
+        total
+    genres[]
+    id
+    images[1]
+        url
+    name
+- https://api.spotify.com/v1/artists/{id}/albums
+    items[]
+        total_tracks
+        external_urls
+            spotify
+        id
+        images[1]
+            url
+        name
+        release_date
+        artists[]
+            external_urls
+                spotify
+            id
+            name
