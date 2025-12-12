@@ -6,6 +6,15 @@ type Token struct {
 	ErrorDescription string `json:"error_description"`
 }
 
+type PageData struct {
+	Title     string
+	Message   string
+	Artist    string
+	TrackData TrackData
+	AlbumData AlbumData
+	Track     string
+}
+
 // structure avec les données de l'album que l'on veut récupérer
 type AllAlbums struct {
 	AlbumItems       []Items `json:"items"`

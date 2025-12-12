@@ -3,6 +3,7 @@ package controller
 import (
 	"Groupie_Tracker/api"
 	"Groupie_Tracker/structure"
+	"Groupie_Tracker/token"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -14,29 +15,10 @@ func renderTemplate(w http.ResponseWriter, filename string, data map[string]stri
 	tmpl.Execute(w, data)                                              // Exécute le template et écrit le résultat dans la réponse HTTP
 }
 
-type PageData struct {
-	Title     string
-	Message   string
-	Artist    string
-	TrackData structure.TrackData
-	AlbumData structure.AlbumData
-	Track     string
-}
-
-var Token *string
-
 func Home(w http.ResponseWriter, r *http.Request) {
-	data := PageData{
+	data := structure.PageData{
 		Title:   "Accueil",
 		Message: "Bienvenue 🎉",
-	}
-	// Récupération du token pour toute la session de l'utilisateur
-	T := api.GetToken()
-	if T.Error != "" {
-		fmt.Println("Erreur lors de la récupération du token : ", T.Error, " ", T.ErrorDescription)
-	} else {
-		Token = &T.AccessToken
-		fmt.Println("Token récupéré : ", *Token)
 	}
 
 	tmpl := template.Must(template.ParseFiles("template/index.html"))
@@ -44,14 +26,19 @@ func Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func Damso(w http.ResponseWriter, r *http.Request) {
+	// Préparation des données à envoyer au template HTML
 	AHTML := structure.AlbumData{}
-	A := api.GetAlbum(*Token, "2UwqpfQtNuhBwviIC0f2ie") //Dasmso Spotify ID: 2UwqpfQtNuhBwviIC0f2ie
+
+	// Récupération du token pour toute la session de l'utilisateur
+	token := token.GetValidToken()
+	// Récupération des albums de l'artiste via l'API Spotify
+	A := api.GetAlbum(token, "2UwqpfQtNuhBwviIC0f2ie") //Dasmso Spotify ID: 2UwqpfQtNuhBwviIC0f2ie
 	if A.Error != "" {
-		fmt.Println("Erreur lors de la récupération de l'album : ", A.Error, " ", A.ErrorDescription)
+		fmt.Printf("controller.Damso - Erreur - récupération de l'album : %s %s\n\n", A.Error, A.ErrorDescription)
 	} else {
-		fmt.Println("\nAlbum récupéré : ", A.AlbumItems)
+		fmt.Printf("controller.Damso - Succès - Album récupéré brut : %v\n\n", A.AlbumItems)
 		for i, item := range A.AlbumItems {
-			fmt.Printf("%d Nom de l'album: %s\nDate de sortie: %s\nNombre de pistes: %d\nURL Spotify: %s\nImage: %s\n\n",
+			fmt.Printf("controller.Damso - Succès - Album %d Nom de l'album: %s\nDate de sortie: %s\nNombre de pistes: %d\nURL Spotify: %s\nImage: %s\n\n",
 				i, item.Name, item.ReleaseDate, item.TotalTracks, item.URL.Spotify, item.Image[1].URL)
 		}
 
@@ -67,7 +54,7 @@ func Damso(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data := PageData{
+	data := structure.PageData{
 		Title:     "Damso",
 		Message:   "Bienvenue sur la page de Damso 🎤",
 		AlbumData: AHTML,
@@ -78,9 +65,10 @@ func Damso(w http.ResponseWriter, r *http.Request) {
 
 func Laylow(w http.ResponseWriter, r *http.Request) {
 	THTML := structure.TrackData{}
-	Tr := api.GetTrack(*Token, "67Pf31pl0PfjBfUmvYNDCL") //Laylow Track ID: 67Pf31pl0PfjBfUmvYNDCL
+	token := token.GetValidToken()
+	Tr := api.GetTrack(token, "67Pf31pl0PfjBfUmvYNDCL") //Laylow Track ID: 67Pf31pl0PfjBfUmvYNDCL
 	if Tr.Error.Message != "" {
-		fmt.Println("Erreur lors de la récupération du track : ", Tr.Error.Status, " ", Tr.Error.Message)
+		fmt.Printf("controller.Laylow - Erreur - récupération du track : %d %s\n\n", Tr.Error.Status, Tr.Error.Message)
 	} else {
 		fmt.Printf("\nTrack récupéré : %s\nAlbum: %s\n", Tr.Name, Tr.Album.Name)
 		fmt.Printf("%d Nom de musique: %s\nNom de l'artiste: %s\nNom de l'album: %s\nDate de sortie: %s\nURL Spotify: %s\nImage: %s\n\n",
@@ -96,7 +84,7 @@ func Laylow(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data := PageData{
+	data := structure.PageData{
 		Title:     "Laylow",
 		Message:   "Bienvenue sur la page de Laylow 🎤",
 		TrackData: THTML,
