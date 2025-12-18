@@ -8,25 +8,10 @@ import (
 	"net/http"
 )
 
-// renderTemplate est une fonction utilitaire pour afficher un template HTML avec des données dynamiques
-func renderTemplate(w http.ResponseWriter, filename string, data map[string]string) {
-	tmpl := template.Must(template.ParseFiles("template/" + filename)) // Charge le fichier template depuis le dossier "template"
-	tmpl.Execute(w, data)                                              // Exécute le template et écrit le résultat dans la réponse HTTP
-}
-
-type PageData struct {
-	Title     string
-	Message   string
-	Artist    string
-	TrackData structure.TrackData
-	AlbumData structure.AlbumData
-	Track     string
-}
-
 var Token *string
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	data := PageData{
+	data := structure.PageData{
 		Title:   "Accueil",
 		Message: "Bienvenue 🎉",
 	}
@@ -67,7 +52,7 @@ func Damso(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data := PageData{
+	data := structure.PageData{
 		Title:     "Damso",
 		Message:   "Bienvenue sur la page de Damso 🎤",
 		AlbumData: AHTML,
@@ -96,7 +81,7 @@ func Laylow(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data := PageData{
+	data := structure.PageData{
 		Title:     "Laylow",
 		Message:   "Bienvenue sur la page de Laylow 🎤",
 		TrackData: THTML,

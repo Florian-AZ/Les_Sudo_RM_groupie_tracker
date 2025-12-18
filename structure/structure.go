@@ -1,5 +1,14 @@
 package structure
 
+type PageData struct {
+	Title     string
+	Message   string
+	Artist    string
+	TrackData TrackData
+	AlbumData AlbumData
+	Track     string
+}
+
 type Token struct {
 	AccessToken      string `json:"access_token"`
 	Error            string `json:"error"`
