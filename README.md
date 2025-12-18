@@ -97,6 +97,27 @@ Menu burger : regroupe les pages inscription + recherche + accueil + favoris
     images[1]
         url
     name
+- https://api.spotify.com/v1/artists/{id}/top-tracks
+    tracks[]
+        album
+            external_urls
+                spotify
+            id
+            images[1]
+                url
+            name
+            release_date
+            total_tracks
+        artists[]
+            external_urls
+                spotify
+            id
+            name
+        duration_ms
+        external_urls
+            spotify
+        id
+        name
 - https://api.spotify.com/v1/artists/{id}/albums
     items[]
         total_tracks
@@ -112,3 +133,43 @@ Menu burger : regroupe les pages inscription + recherche + accueil + favoris
                 spotify
             id
             name
+- https://api.spotify.com/v1/albums/{album id}/tracks
+    items[]
+        artists[]
+            external_urls
+                spotify
+            id
+            name
+        duration_ms
+        external_urls
+            spotify
+        id
+        name
+- https://api.spotify.com/v1/tracks/{track id}
+    album
+        external_urls
+            spotify
+        id
+        images[1]
+            url
+        name
+        release_date
+        total_tracks
+    artists[]
+        external_urls
+            spotify
+        id
+        name
+    duration_ms
+    external_urls
+        spotify
+    id
+    name
+- https://accounts.spotify.com/api/token
+    access_token
+
+# Auteur:
+Florian AZRIA
+
+Emrick RIVET
+
