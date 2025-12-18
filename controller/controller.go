@@ -2,6 +2,7 @@ package controller
 
 import (
 	"Groupie_Tracker/api"
+	"Groupie_Tracker/data"
 	"Groupie_Tracker/structure"
 	"Groupie_Tracker/token"
 	"fmt"
@@ -9,10 +10,11 @@ import (
 	"net/http"
 )
 
+var WebData *structure.PageData = data.InitWebData()
+
 func Home(w http.ResponseWriter, r *http.Request) {
 	data := structure.PageData{
-		Title:   "Accueil",
-		Message: "Bienvenue 🎉",
+		LogIn: WebData.LogIn,
 	}
 
 	tmpl := template.Must(template.ParseFiles("template/index.html"))
@@ -49,8 +51,6 @@ func Damso(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := structure.PageData{
-		Title:     "Damso",
-		Message:   "Bienvenue sur la page de Damso 🎤",
 		AlbumData: AHTML,
 	}
 	tmpl := template.Must(template.ParseFiles("template/damso.html"))
@@ -79,8 +79,6 @@ func Laylow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := structure.PageData{
-		Title:     "Laylow",
-		Message:   "Bienvenue sur la page de Laylow 🎤",
 		TrackData: THTML,
 	}
 	tmpl := template.Must(template.ParseFiles("template/laylow.html"))

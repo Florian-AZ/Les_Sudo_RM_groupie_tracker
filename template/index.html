@@ -4,22 +4,44 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/assets/index.css">
-    <title>Api Spotify</title>
+    <title>Sudo FM - Accueil</title>
 </head>
 
 <body>    
     <nav>
         <div class="menu-item" id="logo">
-            <a href="/assets/img/spotify-logo.png"><img id="SpotifyLogo" src="/assets/img/spotify-logo.png" alt="Spotify Logo"></a>
+            <div>
+                <a href="/"><img src="/assets/img/spotify-logo.png" alt="Logo Sudo FM" class="logo"></a>
+                <p>Sudo FM</p>
+            </div>
+            <div>
+                {{if .LogIn}}
+                <a href="/favoris">Favoris</a>
+                <a href="/deconnexion">Se déconnecter</a>
+                {{end}}
+                {{if not .LogIn}}
+                <a href="/connexion">Se connecter</a>
+                <a href="/inscription">S'inscrire</a>
+                {{end}}
+            </div>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="text-container">
-           <a href="/album/Damso" class="nav-links"><img class="image" src="/assets/img/Damso.png" alt="Photo de Damso"></a>
-        </div>
-        <div class="text-container">
-            <a href="/track/Laylow" class="nav-links"><img class="image" src="/assets/img/Laylow.png" alt="Photo de Laylow"></a>
+    <div>
+        <h1>Découvrez vos sons.</h1>
+        <p>Bienvenue sur Sudo FM, votre plateforme de recherche musicale préférée ! 
+            Plongez dans un univers sonore captivant où chaque note résonne avec passion. 
+            Explorez des milliers de morceaux, artistes et sauvegardez vos musiques préférées. 
+            Que vous soyez fan de pop, rock, jazz ou musique classique, Sudo FM a tout ce qu'il 
+            vous faut pour satisfaire vos envies musicales. 
+        </p>
+        {{if not .LogIn}}
+        <p>
+            Connectez-vous dès maintenant et laissez la musique vous emporter !
+        </p>
+        {{end}}
+        <div>
+            <a href="/recherche">Commencez vos recherches</a>
         </div>
     </div>
 </body>

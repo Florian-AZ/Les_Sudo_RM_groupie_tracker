@@ -1,8 +1,7 @@
 package structure
 
 type PageData struct {
-	Title     string
-	Message   string
+	LogIn     bool
 	Artist    string
 	TrackData TrackData
 	AlbumData AlbumData
