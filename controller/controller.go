@@ -23,35 +23,35 @@ func Home(w http.ResponseWriter, r *http.Request) {
 
 func Damso(w http.ResponseWriter, r *http.Request) {
 	// Préparation des données à envoyer au template HTML
-	AHTML := structure.AlbumData{}
+	html_a := structure.Html_Album{}
 
 	// Récupération du token pour toute la session de l'utilisateur
 	token := token.GetValidToken()
 	// Récupération des albums de l'artiste via l'API Spotify
 	A := api.GetAlbum(token, "2UwqpfQtNuhBwviIC0f2ie") //Dasmso Spotify ID: 2UwqpfQtNuhBwviIC0f2ie
-	if A.Error != "" {
-		fmt.Printf("controller.Damso - Erreur - récupération de l'album : %s %s\n\n", A.Error, A.ErrorDescription)
+	if A.Error.Message != "" {
+		fmt.Printf("controller.Damso - Erreur - récupération de l'album : %d %s\n\n", A.Error.Status, A.Error.Message)
 	} else {
-		fmt.Printf("controller.Damso - Succès - Album récupéré brut : %v\n\n", A.AlbumItems)
-		for i, item := range A.AlbumItems {
+		fmt.Printf("controller.Damso - Succès - Album récupéré brut : %v\n\n", A.Items)
+		for i, item := range A.Items {
 			fmt.Printf("controller.Damso - Succès - Album %d Nom de l'album: %s\nDate de sortie: %s\nNombre de pistes: %d\nURL Spotify: %s\nImage: %s\n\n",
 				i, item.Name, item.ReleaseDate, item.TotalTracks, item.URL.Spotify, item.Image[1].URL)
 		}
 
-		for _, i := range A.AlbumItems {
-			data := structure.Data{
+		for _, i := range A.Items {
+			data := structure.AlbumData{
 				Image:       i.Image[1].URL,
 				Name:        i.Name,
 				ReleaseDate: i.ReleaseDate,
 				TotalTracks: i.TotalTracks,
 				URL:         i.URL.Spotify,
 			}
-			AHTML.Data = append(AHTML.Data, data)
+			html_a.Data = append(html_a.Data, data)
 		}
 	}
 
 	data := structure.PageData{
-		AlbumData: AHTML,
+		AlbumData: html_a,
 	}
 	tmpl := template.Must(template.ParseFiles("template/damso.html"))
 	tmpl.Execute(w, data)

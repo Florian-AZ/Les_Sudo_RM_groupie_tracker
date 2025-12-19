@@ -32,7 +32,7 @@ func GetValidToken() string {
 	}
 }
 
-func GetToken() structure.Token {
+func GetToken() structure.Api_Token {
 
 	// URL de L'API
 	urlApi := "https://accounts.spotify.com/api/token"
@@ -61,7 +61,7 @@ func GetToken() structure.Token {
 	res, errResp := httpClient.Do(req)
 	if errResp != nil {
 		fmt.Printf("token.GetToken - Erreur - Do : %s\n\n", errResp.Error())
-		return structure.Token{Error: errResp.Error()}
+		return structure.Api_Token{Error: errResp.Error()}
 	}
 
 	if res.Body != nil {
@@ -75,7 +75,7 @@ func GetToken() structure.Token {
 	}
 
 	// Déclaration de la variable qui va contenir les données
-	var decodeData structure.Token
+	var decodeData structure.Api_Token
 
 	// Decodage des données en format JSON et ajout des donnée à la variable: decodeData
 	json.Unmarshal(body, &decodeData)
