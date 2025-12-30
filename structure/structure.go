@@ -1,7 +1,10 @@
 package structure
 
 type PageData struct {
-	LogIn     bool
+	LogIn      bool
+	SearchData Html_Recherche
+
+	//Anciennes données pour les albums et tracks individuels
 	Artist    string
 	TrackData TrackData
 	AlbumData Html_Album
@@ -16,30 +19,28 @@ type Api_Token struct {
 
 // Structure avec les données de la recherche
 type Api_Recherche struct {
-	Tracks struct {
-		Items []Api_Track `json:"items"`
-		/*JSON Structure
-		tracks
-			items[]
-				album
-					external_urls
-					id
-					images[1]
-					name
-					release_date
-					total_tracks
+	Tracks Api_AllTracks `json:"tracks"`
+	/*JSON Structure
+	tracks
+	items[]
+		album
+			external_urls
+			id
+			images[1]
+			name
+			release_date
+			total_tracks
 
-				artists[]
-					external_urls
-					id
-					name
+		artists[]
+			external_urls
+			id
+			name
 
-				duration_ms
-				external_urls
-				id
-				name
-		*/
-	} `json:"tracks"`
+		duration_ms
+		external_urls
+		id
+		name
+	*/
 	Artists struct {
 		Items []Api_Artist `json:"items"`
 		/*JSON Structure
@@ -55,23 +56,21 @@ type Api_Recherche struct {
 				name
 		*/
 	} `json:"artists"`
-	Albums struct {
-		Items []Api_Albums `json:"items"`
-		/*JSON Structure
-		albums
-			items[]
-				total_tracks
+	Albums Api_AllAlbums `json:"albums"`
+	/*JSON Structure
+	albums
+		items[]
+			total_tracks
+			external_urls
+			id
+			images[1]
+			name
+			release_date
+			artists[]
 				external_urls
 				id
-				images[1]
 				name
-				release_date
-				artists[]
-					external_urls
-					id
-					name
-		*/
-	} `json:"albums"`
+	*/
 	Error Api_Error `json:"error"`
 }
 
@@ -80,7 +79,8 @@ type Api_AllAlbums struct {
 	Items []Api_Albums `json:"items"`
 	Error Api_Error    `json:"error"`
 	/*JSON Structure
-	items[]
+	albums
+		items[]
 	*/
 }
 
@@ -88,7 +88,7 @@ type Api_Albums struct {
 	TotalTracks int              `json:"total_tracks"`
 	URL         Api_ExternalUrls `json:"external_urls"`
 	Id          string           `json:"id"`
-	Image       []Api_Image      `json:"images"`
+	Images      []Api_Images     `json:"images"`
 	Name        string           `json:"name"`
 	ReleaseDate string           `json:"release_date"`
 	Artists     []Api_Artist     `json:"artists"`
@@ -104,6 +104,11 @@ type Api_Albums struct {
 		id
 		name
 	*/
+}
+
+type Api_AllTracks struct {
+	Items []Api_Track `json:"items"`
+	Error Api_Error   `json:"error"`
 }
 
 type Api_Track struct {
@@ -128,7 +133,7 @@ type Api_Track struct {
 type Api_Track_Album struct {
 	URL         Api_ExternalUrls `json:"external_urls"`
 	Id          string           `json:"id"`
-	Image       []Api_Image      `json:"images"`
+	Images      []Api_Images     `json:"images"`
 	Name        string           `json:"name"`
 	ReleaseDate string           `json:"release_date"`
 	TotalTracks int              `json:"total_tracks"`
@@ -143,34 +148,14 @@ type Api_Track_Album struct {
 	*/
 }
 
-type Api_ExternalUrls struct {
-	Spotify string `json:"spotify"`
-	/*JSON Structure
-	external_urls
-	    spotify
-	*/
-}
-
-type Api_Image struct {
-	URL string `json:"url"`
-	/*JSON Structure
-	images[]
-		url
-	*/
-}
-
-type Api_Error struct {
-	Status  int    `json:"status"`
-	Message string `json:"message"`
-}
-
 type Api_Artist struct {
 	URL       Api_ExternalUrls `json:"external_urls"`
 	Followers Api_Followers    `json:"followers"`
 	Genres    []string         `json:"genres"`
 	Id        string           `json:"id"`
-	Images    []Api_Image      `json:"images"`
+	Images    []Api_Images     `json:"images"`
 	Name      string           `json:"name"`
+	Error     Api_Error        `json:"error"`
 	/*JSON Structure
 	Arists
 		external_urls
@@ -190,10 +175,125 @@ type Api_Followers struct {
 	*/
 }
 
-// Donnée que l'on envoie au html
+type Api_ExternalUrls struct {
+	Spotify string `json:"spotify"`
+	/*JSON Structure
+	external_urls
+	    spotify
+	*/
+}
+
+type Api_Images struct {
+	URL string `json:"url"`
+	/*JSON Structure
+	images[]
+		url
+	*/
+}
+
+type Api_Error struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+}
+
+// Donnée que l'on envoie au html //
+
+// Structure avec les données formatées pour le template HTML
+type Html_Recherche struct {
+	/* Donnée de la recherche que l'on envoie au html
+	TrackData[]
+		AlbumURL    string
+		AlbumId     string
+		AlbumName   string
+		ReleaseDate string
+		TotalTracks int
+		Artists[]
+			ArtistURL  string
+			ArtistId   string
+			ArtistName string
+		TrackName   string
+		DurationMs  int
+		DurationFormated string
+		TrackURL    string
+		TrackId     string
+		Images      string
+	ArtistData[]
+		ArtistURL   string
+		NbFollowers int
+		Genres      []string
+		ArtistId    string
+		ArtistName  string
+		Images      string
+	AlbumData[]
+		TotalTracks int
+		AlbumURL    string
+		AlbumId     string
+		AlbumName   string
+		ReleaseDate string
+		Artists[]
+			ArtistURL  string
+			ArtistId   string
+			ArtistName string
+		Images 		string
+	*/
+	TrackData  []Html_TrackData
+	ArtistData []Html_ArtistData
+	AlbumData  []Html_AlbumData
+}
+
+// Sous-Structure de Html_Recherche pour les tracks
+type Html_TrackData struct {
+	AlbumURL         string
+	AlbumId          string
+	AlbumName        string
+	ReleaseDate      string
+	TotalTracks      int
+	Artists          []Html_Items_ArtistData
+	TrackName        string
+	DurationMs       int
+	DurationFormated string
+	TrackURL         string
+	TrackId          string
+	Images           string
+}
+
+// Sous-Structure de Html_Recherche pour les artists
+type Html_ArtistData struct {
+	ArtistURL   string
+	NbFollowers int
+	Genres      []string
+	ArtistId    string
+	ArtistName  string
+	Images      string
+}
+
+// Sous-Structure de Html_Recherche pour les albums
+type Html_AlbumData struct {
+	TotalTracks int
+	AlbumURL    string
+	AlbumId     string
+	AlbumName   string
+	ReleaseDate string
+	Artists     []Html_Items_ArtistData
+	Images      string
+}
+
+// Sous-Structure des artistes dans les tracks et albums
+type Html_Items_ArtistData struct {
+	ArtistURL  string
+	ArtistId   string
+	ArtistName string
+}
+
+/*---------------------------------------*/
+// Anciennes structures pour les albums et tracks individuels
+
+// Data de l'album que l'on envoie au HTML
 type Html_Album struct {
 	Data []AlbumData
 }
+
+// Sous-structure de Html_Album
 type AlbumData struct {
 	Image       string
 	Name        string
