@@ -48,7 +48,7 @@ func SearchBar(token string, quary string) structure.Api_Recherche {
 	// Lecture et récupération du corps de la requête HTTP
 	body, errBody := io.ReadAll(res.Body)
 	if errBody != nil {
-		fmt.Printf("api. - Erreur - ReadAll : %s\n\n", errBody.Error())
+		fmt.Printf("api.SearchBar - Erreur - ReadAll : %s\n\n", errBody.Error())
 	}
 
 	// Déclaration de la variable qui va contenir les données
@@ -59,10 +59,10 @@ func SearchBar(token string, quary string) structure.Api_Recherche {
 
 	// Affichage des données
 	if decodeData.Error.Message != "" {
-		fmt.Printf("api. - Erreur - %s\n\n", decodeData.Error.Message)
+		fmt.Printf("api.SearchBar - Erreur - %s\n\n", decodeData.Error.Message)
 		return decodeData
 	} else {
-		fmt.Printf("api. - Succès -  brut: %v\n\n", decodeData)
+		fmt.Printf("api.SearchBar - Succès -  brut: %v\n\n", decodeData)
 		return decodeData
 	}
 }

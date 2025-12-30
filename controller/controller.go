@@ -22,9 +22,35 @@ func Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func Recherche(w http.ResponseWriter, r *http.Request) {
+	var pagedata structure.PageData
+	if r.Method == http.MethodPost {
+		token := token.GetValidToken()
+		Recherche := api.SearchBar(token, r.FormValue("recherche"))
+		if Recherche.Error.Message != "" {
+			fmt.Printf("controller - Recherche - Erreur : %d %s\n\n", Recherche.Error.Status, Recherche.Error.Message)
+			pagedata = structure.PageData{
+				ErreurStatus:  Recherche.Error.Status,
+				ErreurMessage: Recherche.Error.Message,
+			}
+		} else {
+			fmt.Printf("controller - Recherche - Succès brut : %v\n\n", Recherche)
+			htmlData := data.TemplateHTMLSearch(Recherche)
+			fmt.Printf("controller - Recherche - Succès struct HTML brut : %v\n\n", htmlData)
 
+			pagedata = structure.PageData{
+				SearchData: htmlData,
+			}
+		}
+		tmpl := template.Must(template.ParseFiles("template/recherche.html"))
+		tmpl.Execute(w, pagedata)
+		return
+	}
+
+	pagedata = structure.PageData{
+		LogIn: WebData.LogIn,
+	}
 	tmpl := template.Must(template.ParseFiles("template/recherche.html"))
-	tmpl.Execute(w, WebData)
+	tmpl.Execute(w, pagedata)
 }
 func Damso(w http.ResponseWriter, r *http.Request) {
 	// Préparation des données à envoyer au template HTML
@@ -40,12 +66,12 @@ func Damso(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("controller.Damso - Succès - Album récupéré brut : %v\n\n", A.Items)
 		for i, item := range A.Items {
 			fmt.Printf("controller.Damso - Succès - Album %d Nom de l'album: %s\nDate de sortie: %s\nNombre de pistes: %d\nURL Spotify: %s\nImage: %s\n\n",
-				i, item.Name, item.ReleaseDate, item.TotalTracks, item.URL.Spotify, item.Image[1].URL)
+				i, item.Name, item.ReleaseDate, item.TotalTracks, item.URL.Spotify, item.Images[1].URL)
 		}
 
 		for _, i := range A.Items {
 			data := structure.AlbumData{
-				Image:       i.Image[1].URL,
+				Image:       i.Images[1].URL,
 				Name:        i.Name,
 				ReleaseDate: i.ReleaseDate,
 				TotalTracks: i.TotalTracks,
@@ -71,14 +97,14 @@ func Laylow(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Printf("\nTrack récupéré : %s\nAlbum: %s\n", Tr.Name, Tr.Album.Name)
 		fmt.Printf("%d Nom de musique: %s\nNom de l'artiste: %s\nNom de l'album: %s\nDate de sortie: %s\nURL Spotify: %s\nImage: %s\n\n",
-			0, Tr.Name, Tr.Artists[0].Name, Tr.Album.Name, Tr.Album.ReleaseDate, Tr.Album.URL.Spotify, Tr.Album.Image[1].URL)
+			0, Tr.Name, Tr.Artists[0].Name, Tr.Album.Name, Tr.Album.ReleaseDate, Tr.Album.URL.Spotify, Tr.Album.Images[1].URL)
 
 		THTML = structure.TrackData{
 			TrackName:    Tr.Name,
 			AlbumName:    Tr.Album.Name,
 			AlbumRelease: Tr.Album.ReleaseDate,
 			AlbumURL:     Tr.Album.URL.Spotify,
-			AlbumImage:   Tr.Album.Image[1].URL,
+			AlbumImage:   Tr.Album.Images[1].URL,
 			ArtistName:   Tr.Artists[0].Name,
 		}
 	}

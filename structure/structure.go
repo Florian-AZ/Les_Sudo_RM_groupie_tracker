@@ -4,6 +4,9 @@ type PageData struct {
 	LogIn      bool
 	SearchData Html_Recherche
 
+	ErreurStatus  int
+	ErreurMessage string
+
 	//Anciennes données pour les albums et tracks individuels
 	Artist    string
 	TrackData TrackData
