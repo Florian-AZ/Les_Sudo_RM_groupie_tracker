@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 )
 
-func SearchBar(token string, quary string) structure.Api_Recherche {
+func SearchBar(token string, quary string, offset int) structure.Api_Recherche {
 	// URL de L'API
 	urlApi := "https://api.spotify.com/v1/search"
 
@@ -32,6 +33,7 @@ func SearchBar(token string, quary string) structure.Api_Recherche {
 	q.Add("q", quary)
 	q.Add("type", "artist,track,album")
 	q.Add("limit", "10")
+	q.Add("offset", strconv.Itoa(offset))
 	req.URL.RawQuery = q.Encode()
 
 	// Execution de la requête HTTP vars L'API

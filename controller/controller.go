@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strconv"
 )
 
 var SessionData = data.InitSessionData()
@@ -31,13 +32,29 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 	   | Cache navigateur            | ✅ Oui                   | ❌ Non                           |
 	   | Usage principal             | Lecture / recherche      | Création / envoi de données       |
 	*/
+	// Déclaration de la variable qui va contenir les données de la page
 	var pagedata structure.PageData_Recherche
-	// Récupération du paramètre GET
-	query := r.URL.Query().Get("recherche")
+	// Récupération du paramètre GET "search" de l'URL
+	query := r.URL.Query().Get("search")
 	// Si une recherche est fournie dans l'URL (méthode GET)
 	if query != "" {
+		// Récupération du paramètre GET "page" de l'URL
+		pagestr := r.URL.Query().Get("page")
+		// Conversion en int avec gestion d'erreur et valeur par défaut (1)
+		page := 1
+		// Si le paramètre page est fourni et valide
+		if pagestr != "" {
+			// Conversion en int (Atoi) avec gestion d'erreur
+			if p, err := strconv.Atoi(pagestr); err == nil && p > 0 {
+				page = p
+			}
+		}
+		// Calcul de l'offset pour l'API Spotify (10 résultats par page). Exemple: page 1 -> offset 0, page 2 -> offset 10, page 3 -> offset 20
+		offset := (page - 1) * 10
+
+		// Récupération d'un token valide
 		token := token.GetValidToken()
-		Recherche := api.SearchBar(token, query)
+		Recherche := api.SearchBar(token, query, offset)
 		// Si une erreur est survenue lors de la recherche
 		if Recherche.Error.Message != "" {
 			fmt.Printf("controller - Recherche - Erreur : %d %s\n\n", Recherche.Error.Status, Recherche.Error.Message)
@@ -48,16 +65,24 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 			}
 			// Si la recherche est un succès
 		} else {
+			// Restructuration des données brutes en données prêtes pour le template HTML
 			htmlData := data.TemplateHTMLSearch(Recherche)
 			fmt.Printf("controller - Recherche - Succès struct HTML brut : %v\n\n", htmlData)
 			SearchFormatLog(htmlData, query)
-
+			// Remplissage des données de la page de recherche
 			pagedata = structure.PageData_Recherche{
 				SearchData:  htmlData,
 				SearchQuery: query,
+				Pagination: structure.Pagination{
+					Page:       page,
+					ASuivant:   (len(htmlData.AlbumData) == 10 || len(htmlData.TrackData) == 10 || len(htmlData.ArtistData) == 10) && page < 100,
+					APrecedent: page > 1,
+					PageSuiv:   page + 1,
+					PagePrec:   page - 1,
+				},
 			}
 		}
-		// Si aucune recherche n'est fournie
+		// Si aucune recherche n'est fournie on affiche une page de recherche vide
 	} else {
 		pagedata = structure.PageData_Recherche{
 			LogIn: SessionData.LogIn,

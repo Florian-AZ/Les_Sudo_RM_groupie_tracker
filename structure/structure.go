@@ -321,7 +321,16 @@ type PageData_Recherche struct {
 	LogIn       bool
 	SearchData  Html_Recherche
 	SearchQuery string
+	Pagination  Pagination
 
 	ErreurStatus  int
 	ErreurMessage string
+}
+
+type Pagination struct {
+	Page       int
+	ASuivant   bool
+	APrecedent bool
+	PageSuiv   int
+	PagePrec   int
 }

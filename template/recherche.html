@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/assets/index.css">
+    <link rel="stylesheet" href="/assets/">
     <title>Sudo FM - Accueil</title>
 </head>
 
@@ -11,7 +11,7 @@
     <nav>
         <div>
             <div>
-                <a href="/"><img src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+                <img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM">
                 <p>Sudo FM</p>
             </div>
             <div>
@@ -30,7 +30,7 @@
     <main>
         <div>
             <form method="GET" action="/recherche">
-                <input type="text" name="recherche" placeholder="Rechercher un artiste, un album ou un titre" value="{{.SearchQuery}}">
+                <input type="text" name="search" placeholder="Rechercher un artiste, un album ou un titre" value="{{.SearchQuery}}">
                 <button type="submit">Rechercher</button>
             </form>
         </div>
@@ -40,8 +40,15 @@
                 <h2>Erreur {{.ErreurStatus}} : {{.ErreurMessage}}</h2>
             </div>
         {{end}}
-        {{if .SearchData}}
+        {{if .SearchQuery}}
             <h2>Résultats :</h2>
+
+            {{if .ErreurMessage}}
+            <div>
+                <a href="/recherche?search={{.SearchQuery}}">Retour en lieu sûr</a>
+                
+            </div>
+            {{end}}
 
             {{if .SearchData.TrackData}}
                 <div>
@@ -87,6 +94,14 @@
                     </ul>
                 </div>
             {{end}}
+            <div>
+                {{if .Pagination.APrecedent}}
+                    <a href="/recherche?search={{.SearchQuery}}&page={{.Pagination.PagePrec}}"><- Page précédente</a>
+                {{end}}
+                {{if .Pagination.ASuivant}}
+                    <a href="/recherche?search={{.SearchQuery}}&page={{.Pagination.PageSuiv}}">Page suivante -></a>
+                {{end}}
+            </div>
         {{end}}
     </main>
 </body>
