@@ -10,108 +10,101 @@ import (
 	"net/http"
 )
 
-var WebData *structure.PageData = data.InitWebData()
+var SessionData = data.InitSessionData()
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	data := structure.PageData{
-		LogIn: WebData.LogIn,
+	pagedata := structure.PageData_Accueil{
+		LogIn: SessionData.LogIn,
 	}
 
 	tmpl := template.Must(template.ParseFiles("template/index.html"))
-	tmpl.Execute(w, data)
+	tmpl.Execute(w, pagedata)
 }
 
 func Recherche(w http.ResponseWriter, r *http.Request) {
-	var pagedata structure.PageData
-	if r.Method == http.MethodPost {
+	/* Critère                       | GET                      | POST                              |
+	   | ----------------------------| -------------------------| ----------------------------------|
+	   | Où sont envoyées les données| Dans l’URL (`?key=value`)| Dans le corps (body) de la requête|
+	   | Visible dans l’URL          | ✅ Oui                  | ❌ Non                            |
+	   | Taille des données          | Limitée                  | Plus grande                       |
+	   | Sécurité                    | ❌ Moins sécurisé        | ✅ Plus adapté                   |
+	   | Cache navigateur            | ✅ Oui                   | ❌ Non                           |
+	   | Usage principal             | Lecture / recherche      | Création / envoi de données       |
+	*/
+	var pagedata structure.PageData_Recherche
+	// Récupération du paramètre GET
+	query := r.URL.Query().Get("recherche")
+	// Si une recherche est fournie dans l'URL (méthode GET)
+	if query != "" {
 		token := token.GetValidToken()
-		Recherche := api.SearchBar(token, r.FormValue("recherche"))
+		Recherche := api.SearchBar(token, query)
+		// Si une erreur est survenue lors de la recherche
 		if Recherche.Error.Message != "" {
 			fmt.Printf("controller - Recherche - Erreur : %d %s\n\n", Recherche.Error.Status, Recherche.Error.Message)
-			pagedata = structure.PageData{
+			pagedata = structure.PageData_Recherche{
+				SearchQuery:   query,
 				ErreurStatus:  Recherche.Error.Status,
 				ErreurMessage: Recherche.Error.Message,
 			}
+			// Si la recherche est un succès
 		} else {
-			fmt.Printf("controller - Recherche - Succès brut : %v\n\n", Recherche)
 			htmlData := data.TemplateHTMLSearch(Recherche)
 			fmt.Printf("controller - Recherche - Succès struct HTML brut : %v\n\n", htmlData)
+			SearchFormatLog(htmlData, query)
 
-			pagedata = structure.PageData{
-				SearchData: htmlData,
+			pagedata = structure.PageData_Recherche{
+				SearchData:  htmlData,
+				SearchQuery: query,
 			}
 		}
-		tmpl := template.Must(template.ParseFiles("template/recherche.html"))
-		tmpl.Execute(w, pagedata)
-		return
+		// Si aucune recherche n'est fournie
+	} else {
+		pagedata = structure.PageData_Recherche{
+			LogIn: SessionData.LogIn,
+		}
 	}
-
-	pagedata = structure.PageData{
-		LogIn: WebData.LogIn,
-	}
+	// Rendu du template HTML avec les données de la page (avec ou sans recherche ou erreur)
 	tmpl := template.Must(template.ParseFiles("template/recherche.html"))
 	tmpl.Execute(w, pagedata)
 }
-func Damso(w http.ResponseWriter, r *http.Request) {
-	// Préparation des données à envoyer au template HTML
-	html_a := structure.Html_Album{}
 
-	// Récupération du token pour toute la session de l'utilisateur
-	token := token.GetValidToken()
-	// Récupération des albums de l'artiste via l'API Spotify
-	A := api.GetAlbum(token, "2UwqpfQtNuhBwviIC0f2ie") //Dasmso Spotify ID: 2UwqpfQtNuhBwviIC0f2ie
-	if A.Error.Message != "" {
-		fmt.Printf("controller.Damso - Erreur - récupération de l'album : %d %s\n\n", A.Error.Status, A.Error.Message)
-	} else {
-		fmt.Printf("controller.Damso - Succès - Album récupéré brut : %v\n\n", A.Items)
-		for i, item := range A.Items {
-			fmt.Printf("controller.Damso - Succès - Album %d Nom de l'album: %s\nDate de sortie: %s\nNombre de pistes: %d\nURL Spotify: %s\nImage: %s\n\n",
-				i, item.Name, item.ReleaseDate, item.TotalTracks, item.URL.Spotify, item.Images[1].URL)
+func SearchFormatLog(S structure.Html_Recherche, query string) {
+	fmt.Printf("///////////////////////////////////////////\n")
+	fmt.Printf("Recherche : %s\n\n", query)
+	fmt.Printf("Tracks :\n")
+	for i, item := range S.TrackData {
+		fmt.Printf("Tracks %d:\n", i+1)
+		fmt.Printf("Main - SearchBar - \nAlbum URL Spotify: %s\nAlbum id: %s\nAlbum Name: %s\nRelease Date: %s\nTotal Tracks : %d\n\n", item.AlbumURL, item.AlbumId, item.AlbumName, item.ReleaseDate, item.TotalTracks)
+		for j, Art := range item.Artists {
+			fmt.Printf("Artist %d URL Spotify: %s\nArtist Name: %s\nArtist ID: %s\n", j+1, Art.ArtistURL, Art.ArtistName, Art.ArtistId)
+		}
+		fmt.Printf("\nTrack Name: %s\nDuration (ms): %d\nDuration (mm:ss): %s\nURL Spotify: %s\nID: %s\nImage (300*300px) URL: %s\n\n", item.TrackName, item.DurationMs, item.DurationFormated, item.TrackURL, item.TrackId, item.Images)
+		fmt.Printf("---------------------------------------\n")
+	}
+
+	fmt.Printf("///////////////////////////////////////////\n")
+	fmt.Printf("\n\nArtists :\n")
+	for i, items := range S.ArtistData {
+		fmt.Printf("Main - SearchBar - Artist %d\nURL Spotify: %s\nNb Followers : %d\n\n", i+1, items.ArtistURL, items.NbFollowers)
+		for j, genres := range items.Genres {
+			fmt.Printf("Genre %d: %s\n", j+1, genres)
 		}
 
-		for _, i := range A.Items {
-			data := structure.AlbumData{
-				Image:       i.Images[1].URL,
-				Name:        i.Name,
-				ReleaseDate: i.ReleaseDate,
-				TotalTracks: i.TotalTracks,
-				URL:         i.URL.Spotify,
-			}
-			html_a.Data = append(html_a.Data, data)
+		fmt.Printf("\nArtist ID: %s\nArtist Name: %s\nImage (300*300px) URL: %s\n\n", items.ArtistId, items.ArtistName, items.Images)
+		fmt.Printf("---------------------------------------\n")
+	}
+
+	fmt.Printf("///////////////////////////////////////////\n")
+	fmt.Printf("\n\nAlbums :\n")
+	for i, itema := range S.AlbumData {
+		fmt.Printf("Albums %d:\n", i+1)
+		fmt.Printf("Main - SearchBar -\nTotal Tracks: %d\nAlbum URL Spotify: %s\nAlbum id: %s\nAlbum Name: %s\nRelease Date: %s\n\n", itema.TotalTracks, itema.AlbumURL, itema.AlbumId, itema.AlbumName, itema.ReleaseDate)
+		for k, Art := range itema.Artists {
+			fmt.Printf("Artist %d Artist ID: %s\nURL Spotify: %s\nArtist Name: %s\n",
+				k+1, Art.ArtistURL, Art.ArtistId, Art.ArtistName)
 		}
+		fmt.Printf("Image (300*300px) URL: %s\n", itema.Images)
+		fmt.Printf("---------------------------------------\n")
 	}
-
-	data := structure.PageData{
-		AlbumData: html_a,
-	}
-	tmpl := template.Must(template.ParseFiles("template/damso.html"))
-	tmpl.Execute(w, data)
-}
-
-func Laylow(w http.ResponseWriter, r *http.Request) {
-	THTML := structure.TrackData{}
-	token := token.GetValidToken()
-	Tr := api.GetTrack(token, "67Pf31pl0PfjBfUmvYNDCL") //Laylow Track ID: 67Pf31pl0PfjBfUmvYNDCL
-	if Tr.Error.Message != "" {
-		fmt.Printf("controller.Laylow - Erreur - récupération du track : %d %s\n\n", Tr.Error.Status, Tr.Error.Message)
-	} else {
-		fmt.Printf("\nTrack récupéré : %s\nAlbum: %s\n", Tr.Name, Tr.Album.Name)
-		fmt.Printf("%d Nom de musique: %s\nNom de l'artiste: %s\nNom de l'album: %s\nDate de sortie: %s\nURL Spotify: %s\nImage: %s\n\n",
-			0, Tr.Name, Tr.Artists[0].Name, Tr.Album.Name, Tr.Album.ReleaseDate, Tr.Album.URL.Spotify, Tr.Album.Images[1].URL)
-
-		THTML = structure.TrackData{
-			TrackName:    Tr.Name,
-			AlbumName:    Tr.Album.Name,
-			AlbumRelease: Tr.Album.ReleaseDate,
-			AlbumURL:     Tr.Album.URL.Spotify,
-			AlbumImage:   Tr.Album.Images[1].URL,
-			ArtistName:   Tr.Artists[0].Name,
-		}
-	}
-
-	data := structure.PageData{
-		TrackData: THTML,
-	}
-	tmpl := template.Must(template.ParseFiles("template/laylow.html"))
-	tmpl.Execute(w, data)
+	fmt.Printf("///////////////////////////////////////////\n")
 }

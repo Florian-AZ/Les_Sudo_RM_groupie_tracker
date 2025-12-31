@@ -6,10 +6,13 @@ import (
 	"time"
 )
 
-// InitWebData initialise les données de la page web
-func InitWebData() *structure.PageData {
-	return &structure.PageData{
-		LogIn: false,
+// InitSessionData initialise les données de la page web
+func InitSessionData() *structure.SessionData {
+	fmt.Printf("data.InitSessionData - Initialisation des données de la session\n\n")
+	// Initialisation des données de la session
+	return &structure.SessionData{
+		Utilisateur: "",
+		LogIn:       false,
 	}
 }
 

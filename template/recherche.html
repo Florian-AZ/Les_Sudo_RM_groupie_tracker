@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/index.css">
+    <title>Sudo FM - Accueil</title>
+</head>
+
+<body>    
+    <nav>
+        <div>
+            <div>
+                <a href="/"><img src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+                <p>Sudo FM</p>
+            </div>
+            <div>
+                <a href="/">Accueil</a>
+                {{if .LogIn}}
+                <a href="/favoris">Favoris</a>
+                <a href="/deconnexion">Se déconnecter</a>
+                {{else}}
+                <a href="/connexion">Se connecter</a>
+                <a href="/inscription">S'inscrire</a>
+                {{end}}
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div>
+            <form method="GET" action="/recherche">
+                <input type="text" name="recherche" placeholder="Rechercher un artiste, un album ou un titre" value="{{.SearchQuery}}">
+                <button type="submit">Rechercher</button>
+            </form>
+        </div>
+
+        {{if .ErreurMessage}}
+            <div>
+                <h2>Erreur {{.ErreurStatus}} : {{.ErreurMessage}}</h2>
+            </div>
+        {{end}}
+        {{if .SearchData}}
+            <h2>Résultats :</h2>
+
+            {{if .SearchData.TrackData}}
+                <div>
+                    <h3>Titres :</h3>
+                    <ul>
+                        {{range $s, $i := .SearchData.TrackData}}
+                            <li>
+                                <a href="/titre/{{$i.TrackId}}">
+                                    {{$i.TrackName}} {{if $i.Artists}}par {{(index $i.Artists 0).ArtistName}}{{else}}Artiste inconnu{{end}}
+                                </a>
+                            </li>
+                        {{end}}
+                    </ul>
+                </div>
+            {{end}}
+
+            {{if .SearchData.ArtistData}}
+                <div>
+                    <h3>Artistes :</h3>
+                    <ul>
+                        {{range .SearchData.ArtistData}}
+                            <li>
+                                <a href="/artiste/{{.ArtistId}}">
+                                    {{.ArtistName}} 
+                                </a>
+                            </li>
+                        {{end}}
+                    </ul>
+                </div>
+            {{end}}
+
+            {{if .SearchData.AlbumData}}
+                <div>
+                    <h3>Albums :</h3>
+                    <ul>
+                        {{range .SearchData.AlbumData}}
+                            <li>
+                                <a href="/album/{{.AlbumId}}">
+                                    {{.AlbumName}} - {{if .ReleaseDate}}{{.ReleaseDate}}{{end}}{{if .Artists}} - {{(index .Artists 0).ArtistName}}{{else}}Artiste inconnu{{end}}
+                                </a>
+                            </li>
+                        {{end}}
+                    </ul>
+                </div>
+            {{end}}
+        {{end}}
+    </main>
+</body>
+
+</html>

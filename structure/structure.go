@@ -1,19 +1,13 @@
 package structure
 
-type PageData struct {
-	LogIn      bool
-	SearchData Html_Recherche
-
-	ErreurStatus  int
-	ErreurMessage string
-
-	//Anciennes données pour les albums et tracks individuels
-	Artist    string
-	TrackData TrackData
-	AlbumData Html_Album
-	Track     string
+type SessionData struct {
+	Utilisateur string
+	LogIn       bool
 }
 
+// Ensemlble des structures pour l'API Spotify //
+
+// Structure avec le token d'accès à l'API Spotify
 type Api_Token struct {
 	AccessToken      string `json:"access_token"`
 	Error            string `json:"error"`
@@ -199,7 +193,7 @@ type Api_Error struct {
 	Message string `json:"message"`
 }
 
-// Donnée que l'on envoie au html //
+// Ensemble des structures formatées pour le template HTML //
 
 // Structure avec les données formatées pour le template HTML
 type Html_Recherche struct {
@@ -313,4 +307,21 @@ type TrackData struct {
 	AlbumURL     string
 	AlbumImage   string
 	ArtistName   string
+}
+
+// Ensemble des structures regroupant les données nécéssaires pour chaque page web //
+
+// Structure des données pour la page d'accueil
+type PageData_Accueil struct {
+	LogIn bool
+}
+
+// Structure des données pour la page recherche
+type PageData_Recherche struct {
+	LogIn       bool
+	SearchData  Html_Recherche
+	SearchQuery string
+
+	ErreurStatus  int
+	ErreurMessage string
 }
