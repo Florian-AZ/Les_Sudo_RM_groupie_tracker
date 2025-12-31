@@ -12,7 +12,6 @@
         <div>
             <div>
                 <img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM">
-                <p>Sudo FM</p>
             </div>
             <div>
                 <a href="/">Accueil</a>
@@ -34,6 +33,26 @@
                 <button type="submit">Rechercher</button>
             </form>
         </div>
+        {{if .SearchQuery}}
+            <div>
+                <a href="/recherche?search=genre:(rock)">Rock</a>
+                <a href="/recherche?search=genre:(pop)">Pop</a>
+                <a href="/recherche?search=genre:(hip-hop)">Hip-Hop</a>
+                <a href="/recherche?search=genre:(jazz)">Jazz</a>
+                <a href="/recherche?search=genre:(classical)">Classique</a>
+                <a href="/recherche?search=genre:(electronic)">Électronique</a>
+            </div>
+            {{else}}
+            <h2>Une recherche par Genre ?</h2>
+            <div>
+                <a href="/recherche?search=genre:(rock)">//Rock//</a>
+                <a href="/recherche?search=genre:(pop)">//Pop//</a>
+                <a href="/recherche?search=genre:(hip-hop)">//Hip-Hop//</a>
+                <a href="/recherche?search=genre:(jazz)">//Jazz//</a>
+                <a href="/recherche?search=genre:(classical)">//Classique//</a>
+                <a href="/recherche?search=genre:(electronic)">//Électronique//</a>
+            </div>
+        {{end}}
 
         {{if .ErreurMessage}}
             <div>
