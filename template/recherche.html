@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/assets/">
-    <title>Sudo FM - Accueil</title>
+    <title>Sudo FM - Recherche</title>
 </head>
 
 <body>    
@@ -116,6 +116,9 @@
             <div>
                 {{if .Pagination.APrecedent}}
                     <a href="/recherche?search={{.SearchQuery}}&page={{.Pagination.PagePrec}}"><- Page précédente</a>
+                {{end}}
+                {{ if .PaginationAlbums.APrecedent or .PaginationAlbums.ASuivant}}
+                    <span>Page {{.PaginationAlbums.Page}}</span>
                 {{end}}
                 {{if .Pagination.ASuivant}}
                     <a href="/recherche?search={{.SearchQuery}}&page={{.Pagination.PageSuiv}}">Page suivante -></a>

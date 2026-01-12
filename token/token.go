@@ -24,6 +24,10 @@ func GetValidToken() string {
 		return accesToken
 	} else {
 		T := GetToken()
+		if T.ErrorStatus != 0 {
+			fmt.Printf("token.GetValidToken - Erreur - Impossible de récupérer un token valide\n\n")
+			return ""
+		}
 		accesToken = T.AccessToken
 		fmt.Printf("token.GetValidToken - Nouveau - Token : %s\n\n", accesToken)
 		dateExpiration = time.Now().Add(time.Hour)
@@ -61,7 +65,10 @@ func GetToken() structure.Api_Token {
 	res, errResp := httpClient.Do(req)
 	if errResp != nil {
 		fmt.Printf("token.GetToken - Erreur - Do : %s\n\n", errResp.Error())
-		return structure.Api_Token{Error: errResp.Error()}
+		return structure.Api_Token{
+			ErrorStatus:      500,
+			ErrorDescription: errResp.Error(),
+		}
 	}
 
 	if res.Body != nil {
@@ -81,7 +88,7 @@ func GetToken() structure.Api_Token {
 	json.Unmarshal(body, &decodeData)
 
 	// Affichage des données
-	if decodeData.Error != "" {
+	if decodeData.ErrorStatus != 0 {
 		fmt.Printf("token.GetToken - Erreur - Token non récupéré : %s\n\n", decodeData.ErrorDescription)
 		return decodeData
 	} else {

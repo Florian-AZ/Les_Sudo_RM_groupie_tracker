@@ -3,6 +3,9 @@ package data
 import (
 	"Groupie_Tracker/structure"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -121,6 +124,50 @@ func FormatArtists(Artist_Items []structure.Api_Artist) []structure.Html_Items_A
 	return artists
 }
 
+func TemplateHTMLArtist(Artist structure.Api_Artist, TopTracks structure.Api_TopTracks, Albums structure.Api_ArtistAlbums) structure.Html_Artist {
+	// Remplissage des données pour le template HTML
+	var html_A structure.Html_Artist
+	// Données de l'artiste
+	html_A.Artist.ArtistId = Artist.Id
+	html_A.Artist.ArtistName = Artist.Name
+	html_A.Artist.NbFollowers = Artist.Followers.Total
+	html_A.Artist.Genres = Artist.Genres
+	html_A.Artist.Images = GetImageAtIndex(Artist.Images, 1)
+	html_A.Artist.ArtistURL = Artist.URL.Spotify
+	// Données des Top Tracks
+	for _, tt_items := range TopTracks.Tracks {
+		trackData := structure.Html_TrackData{
+			AlbumURL:         tt_items.Album.URL.Spotify,
+			AlbumId:          tt_items.Album.Id,
+			AlbumName:        tt_items.Album.Name,
+			ReleaseDate:      tt_items.Album.ReleaseDate,
+			TotalTracks:      tt_items.Album.TotalTracks,
+			Artists:          FormatArtists(tt_items.Artists),
+			TrackName:        tt_items.Name,
+			DurationMs:       tt_items.DurationMs,
+			DurationFormated: FormatDuration(tt_items.DurationMs),
+			TrackURL:         tt_items.URL.Spotify,
+			TrackId:          tt_items.Id,
+			Images:           GetImageAtIndex(tt_items.Album.Images, 1),
+		}
+		html_A.TopTracks = append(html_A.TopTracks, trackData)
+	}
+	// Données des Albums
+	for _, alb_items := range Albums.Items {
+		albumData := structure.Html_AlbumData{
+			TotalTracks: alb_items.TotalTracks,
+			AlbumURL:    alb_items.URL.Spotify,
+			AlbumId:     alb_items.Id,
+			AlbumName:   alb_items.Name,
+			ReleaseDate: alb_items.ReleaseDate,
+			Artists:     FormatArtists(alb_items.Artists),
+			Images:      GetImageAtIndex(alb_items.Images, 1),
+		}
+		html_A.Albums = append(html_A.Albums, albumData)
+	}
+	return html_A
+}
+
 // GetImageAtIndex vérifie si l'index de la slice d'images existe et retourne son URL, sinon retourne une chaîne vide
 func GetImageAtIndex(Img_Items []structure.Api_Images, index int) string {
 	if len(Img_Items) > index {
@@ -140,4 +187,130 @@ func FormatDuration(ms int) string {
 	minutes := int(d.Minutes())
 	seconds := int(d.Seconds()) % 60
 	return fmt.Sprintf("%02d:%02d", minutes, seconds)
+}
+
+func GetIdFromUrl(r *http.Request) string {
+	// Récupération de l'ID de l'artiste depuis l'URL
+	// Exemple d'URL : /artiste/12345
+	// On découpe l'URL coupant par les "/"
+	// Exemple : ["", "artiste", "12345"]
+	parties := strings.Split(r.URL.Path, "/")
+	// Si les parties sont inférieures ou égales à 2 ou que la 3ème partie est vide, on retourne une chaîne vide
+	if len(parties) < 3 {
+		return ""
+	}
+	return parties[2]
+}
+
+func GetPageOffset(pagestr string) (int, int) {
+	// Conversion en int avec gestion d'erreur et valeur par défaut (1)
+	page := 1
+	// Si le paramètre page est fourni et valide
+	if pagestr != "" {
+		// Conversion en int (Atoi) avec gestion d'erreur
+		//Si pas d'erreur et page > 0 on utilise la valeur fournie
+		if p, err := strconv.Atoi(pagestr); err == nil && p > 0 {
+			page = p
+		}
+	}
+	// Calcul de l'offset pour l'API Spotify (10 résultats par page). Exemple: page 1 -> offset 0, page 2 -> offset 10, page 3 -> offset 20
+	offset := (page - 1) * 10
+	return page, offset
+}
+
+// TemplateErreur prépare les données d'erreur pour le template HTML en fonction du type (API ou Application (Serveur Go)) et du statut de l'erreur
+func TemplateErreur(status int, errType string) structure.Html_Erreur {
+	switch errType {
+	// Gestion des erreurs provenant de l'API Spotify
+	case "API":
+		switch status {
+		//400 — Mauvaise requête - Paramètres manquants ou invalides (q, type, offset, etc.))
+		case 400:
+			return structure.Html_Erreur{
+				Status:  400,
+				Message: "Requête invalide. Veuillez vérifier les paramètres fournis.",
+			}
+		// 401 — Non autorisé (token invalide / expiré)
+		case 401:
+			return structure.Html_Erreur{
+				Status:  401,
+				Message: "Accès interdit à cette ressource.",
+			}
+		//403 Accès interdit - Droits insuffisants (le token n'a pas les permissions nécessaires)
+		case 403:
+			return structure.Html_Erreur{
+				Status:  403,
+				Message: "Accès refusé. Vous n'avez pas les permissions nécessaires.",
+			}
+		//404 Ressource non trouvée (Artiste / album / titre inexistant ou supprimé)
+		case 404:
+			return structure.Html_Erreur{
+				Status:  404,
+				Message: "Ressource introuvable sur Spotify.",
+			}
+		//429 Trop de requêtes - Rate limit Spotify atteint
+		case 429:
+			return structure.Html_Erreur{
+				Status:  429,
+				Message: "Trop de requêtes envoyées. Veuillez réessayer plus tard.",
+			}
+		//500 Erreur interne du service Spotify (server Spotify en erreur)
+		case 500:
+			return structure.Html_Erreur{
+				Status:  500,
+				Message: "Erreur interne du service Spotify.",
+			}
+		//503 Service indisponible - Maintenance ou surcharge du service Spotify
+		case 503:
+			return structure.Html_Erreur{
+				Status:  503,
+				Message: "Service Spotify momentanément indisponible.",
+			}
+		// Erreur par défaut pour les autres codes d'erreur
+		default:
+			return structure.Html_Erreur{
+				Status:  status,
+				Message: "Une erreur d'API est survenue. Veuillez réessayer plus tard.",
+			}
+		}
+	// Gestion des erreurs provenant de l'application (Serveur Go)
+	case "APP":
+		switch status {
+		// Paramètre invalide (ID vide, page négative, etc.)
+		case 400:
+			return structure.Html_Erreur{
+				Status:  400,
+				Message: "Paramètre requis manquant dans l'URL.",
+			}
+		// Paramètre manquant dans l’URL (/artiste/ sans ID)
+		case 404:
+			return structure.Html_Erreur{
+				Status:  404,
+				Message: "Paramètre invalide fourni.",
+			}
+		// Erreur de parsing des données - JSON / conversion (json.Unmarshal, strconv.Atoi, etc.)
+		case 500:
+			return structure.Html_Erreur{
+				Status:  500,
+				Message: "Erreur lors du traitement des données.",
+			}
+		// Timeout API - Timeout HTTP (http.Client{Timeout: ...})
+		case 504:
+			return structure.Html_Erreur{
+				Status:  504,
+				Message: "Délai d'attente dépassé lors de la communication avec l'API Spotify.",
+			}
+		default:
+			return structure.Html_Erreur{
+				Status:  status,
+				Message: "Une erreur d'application est survenue. Veuillez réessayer plus tard.",
+			}
+		}
+	// Erreur par défaut pour les types inconnus
+	default:
+		return structure.Html_Erreur{
+			Status:  status,
+			Message: "Une erreur inconnue est survenue.",
+		}
+	}
 }

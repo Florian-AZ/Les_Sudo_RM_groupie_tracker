@@ -10,7 +10,7 @@ type SessionData struct {
 // Structure avec le token d'accès à l'API Spotify
 type Api_Token struct {
 	AccessToken      string `json:"access_token"`
-	Error            string `json:"error"`
+	ErrorStatus      int    `json:"status"`
 	ErrorDescription string `json:"error_description"`
 }
 
@@ -145,6 +145,11 @@ type Api_Track_Album struct {
 	*/
 }
 
+type Api_TopTracks struct {
+	Tracks []Api_Track `json:"tracks"`
+	Error  Api_Error   `json:"error"`
+}
+
 type Api_Artist struct {
 	URL       Api_ExternalUrls `json:"external_urls"`
 	Followers Api_Followers    `json:"followers"`
@@ -162,6 +167,11 @@ type Api_Artist struct {
 		images[1]
 		name
 	*/
+}
+
+type Api_ArtistAlbums struct {
+	Items []Api_Albums `json:"items"`
+	Error Api_Error    `json:"error"`
 }
 
 type Api_Followers struct {
@@ -238,6 +248,12 @@ type Html_Recherche struct {
 	AlbumData  []Html_AlbumData
 }
 
+type Html_Artist struct {
+	Artist    Html_ArtistData
+	TopTracks []Html_TrackData
+	Albums    []Html_AlbumData
+}
+
 // Sous-Structure de Html_Recherche pour les tracks
 type Html_TrackData struct {
 	AlbumURL         string
@@ -282,31 +298,9 @@ type Html_Items_ArtistData struct {
 	ArtistName string
 }
 
-/*---------------------------------------*/
-// Anciennes structures pour les albums et tracks individuels
-
-// Data de l'album que l'on envoie au HTML
-type Html_Album struct {
-	Data []AlbumData
-}
-
-// Sous-structure de Html_Album
-type AlbumData struct {
-	Image       string
-	Name        string
-	ReleaseDate string
-	TotalTracks int
-	URL         string
-}
-
-// Data de la track que l'on envoie au HTML
-type TrackData struct {
-	TrackName    string
-	AlbumName    string
-	AlbumRelease string
-	AlbumURL     string
-	AlbumImage   string
-	ArtistName   string
+type Html_Erreur struct {
+	Status  int
+	Message string
 }
 
 // Ensemble des structures regroupant les données nécéssaires pour chaque page web //
@@ -327,10 +321,26 @@ type PageData_Recherche struct {
 	ErreurMessage string
 }
 
+type PageData_Artiste struct {
+	LogIn                 bool
+	ArtistData            Html_Artist
+	PaginationTotalTracks Pagination
+	PaginationAlbums      Pagination
+	ErrTotalTracks        Html_Erreur
+	ErrAlbums             Html_Erreur
+}
+
+// Structure de la pagination
 type Pagination struct {
 	Page       int
 	ASuivant   bool
 	APrecedent bool
 	PageSuiv   int
 	PagePrec   int
+}
+
+type PageData_Erreur struct {
+	LogIn         bool
+	ErreurStatus  int
+	ErreurMessage string
 }

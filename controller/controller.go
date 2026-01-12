@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"strconv"
 )
 
 var SessionData = data.InitSessionData()
 
 func Home(w http.ResponseWriter, r *http.Request) {
+	// Déclaration de la variable qui va contenir les données de la page
 	pagedata := structure.PageData_Accueil{
 		LogIn: SessionData.LogIn,
 	}
@@ -32,7 +32,6 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 	   | Cache navigateur            | ✅ Oui                   | ❌ Non                           |
 	   | Usage principal             | Lecture / recherche      | Création / envoi de données       |
 	*/
-	// Déclaration de la variable qui va contenir les données de la page
 	var pagedata structure.PageData_Recherche
 	// Récupération du paramètre GET "search" de l'URL
 	query := r.URL.Query().Get("search")
@@ -40,30 +39,24 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 	if query != "" {
 		// Récupération du paramètre GET "page" de l'URL
 		pagestr := r.URL.Query().Get("page")
-		// Conversion en int avec gestion d'erreur et valeur par défaut (1)
-		page := 1
-		// Si le paramètre page est fourni et valide
-		if pagestr != "" {
-			// Conversion en int (Atoi) avec gestion d'erreur
-			//Si pas d'erreur et page > 0 on utilise la valeur fournie
-			if p, err := strconv.Atoi(pagestr); err == nil && p > 0 {
-				page = p
-			}
-		}
-		// Calcul de l'offset pour l'API Spotify (10 résultats par page). Exemple: page 1 -> offset 0, page 2 -> offset 10, page 3 -> offset 20
-		offset := (page - 1) * 10
+		page, offset := data.GetPageOffset(pagestr)
+		fmt.Printf("controller - Recherche - Recherche fournie : %s | Page : %d | Offset : %d\n\n", query, page, offset)
 
 		// Récupération d'un token valide
 		token := token.GetValidToken()
+		if token == "" {
+			fmt.Printf("controller - Recherche - Erreur : Token invalide\n\n")
+			pagedata := data.TemplateErreur(500, "APP")
+			Erreur(w, r, pagedata.Status, pagedata.Message)
+			return
+		}
 		Recherche := api.SearchBar(token, query, offset)
-		// Si une erreur est survenue lors de la recherche
+		// Si une erreur est survenue lors de la recherche, on affiche une page d'erreur
 		if Recherche.Error.Message != "" {
 			fmt.Printf("controller - Recherche - Erreur : %d %s\n\n", Recherche.Error.Status, Recherche.Error.Message)
-			pagedata = structure.PageData_Recherche{
-				SearchQuery:   query,
-				ErreurStatus:  Recherche.Error.Status,
-				ErreurMessage: Recherche.Error.Message,
-			}
+			pagedata := data.TemplateErreur(Recherche.Error.Status, "API")
+			Erreur(w, r, pagedata.Status, pagedata.Message)
+			return
 			// Si la recherche est un succès
 		} else {
 			// Restructuration des données brutes en données prêtes pour le template HTML
@@ -76,8 +69,8 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 				SearchQuery: query,
 				Pagination: structure.Pagination{
 					Page: page,
-					//On envoie le bouton "Suivant" si on a 10 résultats (limite max par requête) et que la page actuelle est inférieure à 100 (limite max de l'API Spotify)
-					ASuivant:   (len(htmlData.AlbumData) == 10 || len(htmlData.TrackData) == 10 || len(htmlData.ArtistData) == 10) && page < 100,
+					//On envoie le bouton "Suivant" si on a plus de 10 résultats (limite max par requête) et que la page actuelle est inférieure à 100 (limite max de l'API Spotify)
+					ASuivant:   (len(htmlData.AlbumData) > 10 || len(htmlData.TrackData) >= 10 || len(htmlData.ArtistData) >= 10) && page < 100,
 					APrecedent: page > 1,
 					PageSuiv:   page + 1,
 					PagePrec:   page - 1,
@@ -90,8 +83,83 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 			LogIn: SessionData.LogIn,
 		}
 	}
-	// Rendu du template HTML avec les données de la page (avec ou sans recherche ou erreur)
+	// Rendu du template HTML avec les données de la page (avec ou sans recherche)
 	tmpl := template.Must(template.ParseFiles("template/recherche.html"))
+	tmpl.Execute(w, pagedata)
+}
+
+func Artiste(w http.ResponseWriter, r *http.Request) {
+	// Récupération de l'ID de l'artiste depuis l'URL
+	artistID := data.GetIdFromUrl(r)
+	// Si aucun ID n'est fourni
+	if artistID == "" {
+		// Rdiriger vers la page not found
+		fmt.Printf("controller - Artiste - Aucun ID d'artiste fourni dans l'URL\n\n")
+		// Préparation des données d'erreur
+		pagedata := data.TemplateErreur(400, "APP")
+		Erreur(w, r, pagedata.Status, pagedata.Message)
+		return
+	}
+	// Récupération d'un token valide
+	token := token.GetValidToken()
+	ArtisteData := api.GetArtistData(token, artistID, 0)
+	// Si une erreur est survenue lors de la récupération des données de l'artiste
+	if ArtisteData.Error.Message != "" {
+		fmt.Printf("controller - Artiste - Erreur : %d %s\n\n", ArtisteData.Error.Status, ArtisteData.Error.Message)
+		pagedata := data.TemplateErreur(ArtisteData.Error.Status, "API")
+		Erreur(w, r, pagedata.Status, pagedata.Message)
+		return
+	}
+	// Si la récupération des données de l'artiste est un succès
+	fmt.Printf("controller - Artiste - Succès struct brut : %v\n\n", ArtisteData)
+
+	var pagestr string
+	//Artist Top Tracks
+
+	ArtistTopTracks := api.GetArtistTopTracks(token, artistID)
+	// Si une erreur est survenue lors de la récupération des Top Tracks
+	if ArtistTopTracks.Error.Message != "" {
+		fmt.Printf("controller - Artiste - Top Tracks - Erreur : %d %s\n\n", ArtistTopTracks.Error.Status, ArtistTopTracks.Error.Message)
+	}
+
+	//Artist Albums
+	// Récupération du paramètre GET "pageAlbums" de l'URL pour la pagination
+	pagestr = r.URL.Query().Get("pageAlbums")
+	pageAlbums, offset := data.GetPageOffset(pagestr)
+
+	ArtistAlbums := api.GetArtistAlbums(token, artistID, offset)
+	// Si une erreur est survenue lors de la récupération des Albums
+	if ArtistAlbums.Error.Message != "" {
+		fmt.Printf("controller - Artiste - Albums - Erreur : %d %s\n\n", ArtistAlbums.Error.Status, ArtistAlbums.Error.Message)
+	}
+
+	// Remplissage des données de la page de l'artiste
+	htmldata := data.TemplateHTMLArtist(ArtisteData, ArtistTopTracks, ArtistAlbums)
+	pagedata := structure.PageData_Artiste{
+		LogIn:      SessionData.LogIn,
+		ArtistData: htmldata,
+		PaginationAlbums: structure.Pagination{
+			Page: pageAlbums,
+			//On envoie le bouton "Suivant" si on a plus de 10 résultats (limite max par requête) et que la page actuelle est inférieure à 100 (limite max de l'API Spotify)
+			ASuivant:   (len(ArtistAlbums.Items) > 10) && pageAlbums < 100,
+			APrecedent: pageAlbums > 1,
+			PageSuiv:   pageAlbums + 1,
+			PagePrec:   pageAlbums - 1,
+		},
+		ErrTotalTracks: data.TemplateErreur(ArtistTopTracks.Error.Status, "API"),
+		ErrAlbums:      data.TemplateErreur(ArtistAlbums.Error.Status, "API"),
+	}
+	tmpl := template.Must(template.ParseFiles("template/artiste.html"))
+	tmpl.Execute(w, pagedata)
+}
+
+func Erreur(w http.ResponseWriter, r *http.Request, status int, message string) {
+	pagedata := structure.PageData_Erreur{
+		LogIn:         SessionData.LogIn,
+		ErreurStatus:  status,
+		ErreurMessage: message,
+	}
+	tmpl := template.Must(template.ParseFiles("template/erreur.html"))
 	tmpl.Execute(w, pagedata)
 }
 

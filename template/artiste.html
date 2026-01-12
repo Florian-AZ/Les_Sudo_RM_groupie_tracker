@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/">
+    <title>Sudo FM - Artiste</title>
+</head>
+
+<body>    
+    <nav>
+        <div>
+            <div>
+                <img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM">
+            </div>
+            <div>
+                <a href="/">Accueil</a>
+                <a href="/recherche">Recherche</a>
+                {{if .LogIn}}
+                <a href="/favoris">Favoris</a>
+                <a href="/deconnexion">Se déconnecter</a>
+                {{else}}
+                <a href="/connexion">Se connecter</a>
+                <a href="/inscription">S'inscrire</a>
+                {{end}}
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        
+
+        
+
+        <!-- Contenu de la page artiste -->
+        <div>
+            <h1>{{.ArtistData.Artist.ArtistName}}</h1>
+            <!-- Affichage des Top Tracks -->
+            {{if .ArtistData.TopTracks}}
+                <h2>Top Titres</h2>
+                    {{if .ErrTotalTracks.Status}}
+                        <div>
+                            <h2>Erreur {{.ErrTotalTracks.Status}} lors du chargement des Top Titres : {{.ErrTotalTracks.Message}}</h2>
+                        </div>
+                    {{else}}
+                        <ul>
+                            {{range $s, $i := .ArtistData.TopTracks}}
+                            <li><a href="/titre/{{$i.TrackId}}">{{$i.TrackName}}</a></li>
+                            {{end}}
+                        </ul> 
+                    {{end}}
+            {{end}}
+            <!-- Affichage des Albums -->
+            <h2>Albums</h2>
+            {{if .ErrAlbums.Status}}
+                <div>
+                    <h2>Erreur {{.ErrAlbums.Status}} lors du chargement des Albums : {{.ErrAlbums.Message}}</h2>
+                </div>
+            {{end}}
+            <ul>
+            {{range $s, $i := .ArtistData.Albums}}
+                <li><a href="/album/{{$i.AlbumId}}">{{$i.AlbumName}}</a></li>
+            {{end}}
+            </ul>
+            <!-- Pagination des Albums -->
+            <div>
+                {{if .PaginationAlbums.APrecedent}}
+                    <a href="?pageAlbums={{ .PaginationAlbums.PagePrec}}">Page Précédente</a>
+                {{end}}
+                {{ if .PaginationAlbums.APrecedent or .PaginationAlbums.ASuivant}}
+                    <span>Page {{.PaginationAlbums.Page}}</span>
+                {{end}}
+                {{if .PaginationAlbums.ASuivant}}
+                    <a href="?pageAlbums={{ .PaginationAlbums.PageSuiv}}">Page Suivante</a>
+                {{end}}
+            </div>
+        </div>
+        
+    </main>
+</body>
+
+</html>
