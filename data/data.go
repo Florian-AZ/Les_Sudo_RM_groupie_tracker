@@ -168,6 +168,30 @@ func TemplateHTMLArtist(Artist structure.Api_Artist, TopTracks structure.Api_Top
 	return html_A
 }
 
+func TemplateHTMLAlbums(AlbumTracks structure.Api_AlbumsTracks) structure.Html_AlbumTracks {
+	// Remplissage des données pour le template HTML
+	var html_Al structure.Html_AlbumTracks
+	// Données de l'album
+	html_Al.AlbumID = AlbumTracks.AlbumID
+	html_Al.Images = GetImageAtIndex(AlbumTracks.Images, 1)
+	html_Al.AlbumName = AlbumTracks.AlbumName
+	html_Al.Release_date = AlbumTracks.Release_date
+	html_Al.AlbumArtists = FormatArtists(AlbumTracks.AlbumArtists)
+	// Données des Tracks de l'album
+	for _, at_items := range AlbumTracks.Tracks.Items {
+		trackData := structure.Html_AlbumTracks_Items{
+			Artists:          FormatArtists(at_items.Artists),
+			DurationMs:       at_items.DurationMs,
+			DurationFormated: FormatDuration(at_items.DurationMs),
+			TrackURL:         at_items.URL.Spotify,
+			TrackId:          at_items.Id,
+			TrackName:        at_items.Name,
+		}
+		html_Al.Items = append(html_Al.Items, trackData)
+	}
+	return html_Al
+}
+
 // GetImageAtIndex vérifie si l'index de la slice d'images existe et retourne son URL, sinon retourne une chaîne vide
 func GetImageAtIndex(Img_Items []structure.Api_Images, index int) string {
 	if len(Img_Items) > index {

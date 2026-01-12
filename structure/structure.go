@@ -174,6 +174,26 @@ type Api_ArtistAlbums struct {
 	Error Api_Error    `json:"error"`
 }
 
+type Api_AlbumsTracks struct {
+	AlbumID      string       `json:"id"`
+	Images       []Api_Images `json:"images"`
+	AlbumName    string       `json:"name"`
+	Release_date string       `json:"release_date"`
+	AlbumArtists []Api_Artist `json:"artists"`
+	Tracks       struct {
+		Items []Api_AlbumsTracks_Items `json:"items"`
+	} `json:"tracks"`
+	Error Api_Error `json:"error"`
+}
+
+type Api_AlbumsTracks_Items struct {
+	Artists    []Api_Artist     `json:"artists"`
+	DurationMs int              `json:"duration_ms"`
+	URL        Api_ExternalUrls `json:"external_urls"`
+	Id         string           `json:"id"`
+	Name       string           `json:"name"`
+}
+
 type Api_Followers struct {
 	Total int `json:"total"`
 	/*JSON Structure
@@ -291,6 +311,24 @@ type Html_AlbumData struct {
 	Images      string
 }
 
+type Html_AlbumTracks struct {
+	AlbumID      string
+	Images       string
+	AlbumName    string
+	Release_date string
+	AlbumArtists []Html_Items_ArtistData
+	Items        []Html_AlbumTracks_Items
+}
+
+type Html_AlbumTracks_Items struct {
+	Artists          []Html_Items_ArtistData
+	DurationMs       int
+	DurationFormated string
+	TrackURL         string
+	TrackId          string
+	TrackName        string
+}
+
 // Sous-Structure des artistes dans les tracks et albums
 type Html_Items_ArtistData struct {
 	ArtistURL  string
@@ -316,9 +354,6 @@ type PageData_Recherche struct {
 	SearchData  Html_Recherche
 	SearchQuery string
 	Pagination  Pagination
-
-	ErreurStatus  int
-	ErreurMessage string
 }
 
 type PageData_Artiste struct {
@@ -328,6 +363,12 @@ type PageData_Artiste struct {
 	PaginationAlbums      Pagination
 	ErrTotalTracks        Html_Erreur
 	ErrAlbums             Html_Erreur
+}
+
+type PageData_Album struct {
+	LogIn       bool
+	AlbumTracks Html_AlbumTracks
+	Pagination  Pagination
 }
 
 // Structure de la pagination

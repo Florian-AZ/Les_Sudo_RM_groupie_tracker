@@ -53,22 +53,8 @@
                 <a href="/recherche?search=genre:(electronic)">//Électronique//</a>
             </div>
         {{end}}
-
-        {{if .ErreurMessage}}
-            <div>
-                <h2>Erreur {{.ErreurStatus}} : {{.ErreurMessage}}</h2>
-            </div>
-        {{end}}
         {{if .SearchQuery}}
             <h2>Résultats :</h2>
-
-            {{if .ErreurMessage}}
-            <div>
-                <a href="/recherche?search={{.SearchQuery}}">Retour en lieu sûr</a>
-                
-            </div>
-            {{end}}
-
             {{if .SearchData.TrackData}}
                 <div>
                     <h3>Titres :</h3>
