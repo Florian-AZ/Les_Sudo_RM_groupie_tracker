@@ -45,6 +45,7 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 		// Si le paramètre page est fourni et valide
 		if pagestr != "" {
 			// Conversion en int (Atoi) avec gestion d'erreur
+			//Si pas d'erreur et page > 0 on utilise la valeur fournie
 			if p, err := strconv.Atoi(pagestr); err == nil && p > 0 {
 				page = p
 			}
@@ -74,7 +75,8 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 				SearchData:  htmlData,
 				SearchQuery: query,
 				Pagination: structure.Pagination{
-					Page:       page,
+					Page: page,
+					//On envoie le bouton "Suivant" si on a 10 résultats (limite max par requête) et que la page actuelle est inférieure à 100 (limite max de l'API Spotify)
 					ASuivant:   (len(htmlData.AlbumData) == 10 || len(htmlData.TrackData) == 10 || len(htmlData.ArtistData) == 10) && page < 100,
 					APrecedent: page > 1,
 					PageSuiv:   page + 1,
