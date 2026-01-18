@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/">
+    <title>Sudo FM - Deconnexion</title>
+</head>
+
+<body>    
+    <nav>
+        <div>
+            <div>
+                <a href="/"><img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+            </div>
+            <div>
+                <a href="/recherche">Recherche</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div>
+            <div>
+                <h1>Êtes-vous sûr de vouloir vous déconnecter ?</h1>
+                <div>
+                    <form method="POST" action="/deconnexion">
+                        <input type="hidden" name="deconnexion" value="true">
+                        <button type="submit">Se déconnecter</button>
+                    </form>
+                    <form method="POST" action="/deconnexion">
+                        <input type="hidden" name="deconnexion" value="false">
+                        <button type="submit">Annuler</button>
+                    </form>
+                </div>
+            </div>
+        </div>        
+    </main>
+</body>
+
+</html>

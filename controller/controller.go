@@ -269,6 +269,7 @@ func Inscription(w http.ResponseWriter, r *http.Request) {
 					Erreur: "Erreur lors de l'inscription: " + err,
 				}
 			} else {
+				fmt.Printf("controller - Inscription - Utilisateur %s inscrit avec succès\n\n", user)
 				// Redirige vers la page de connexion après une inscription réussie (code 303(requête GET))
 				http.Redirect(w, r, "/connexion", http.StatusSeeOther)
 				return
@@ -297,6 +298,7 @@ func Connexion(w http.ResponseWriter, r *http.Request) {
 				Erreur: "Erreur lors de la connexion : " + err,
 			}
 		} else {
+			fmt.Printf("controller - Connexion - Utilisateur %s connecté avec succès\n\n", user)
 			// Redirige vers la page d'accueil après une connexion réussie (code 303(requête GET))
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
@@ -306,6 +308,27 @@ func Connexion(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := template.Must(template.ParseFiles("template/connexion.html"))
 	tmpl.Execute(w, pagedata)
+}
+
+// Fonction pour déconnecter l'utilisateur
+func Deconnexion(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		if r.FormValue("deconnexion") == "true" {
+			// Réinitialisation des données de session
+			SessionData.LogIn = false
+			SessionData.Utilisateur = structure.Utilisateur{
+				Nom:     "",
+				Favoris: []string{},
+			}
+			fmt.Printf("controller - Deconnexion - Utilisateur %s déconnecté avec succès\n\n", SessionData.Utilisateur.Nom)
+			// Redirige vers la page d'accueil après la déconnexion (code 303(requête GET))
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		} else {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		}
+	}
+	tmpl := template.Must(template.ParseFiles("template/deconnexion.html"))
+	tmpl.Execute(w, nil)
 }
 
 // Fonction pour afficher une page d'erreur

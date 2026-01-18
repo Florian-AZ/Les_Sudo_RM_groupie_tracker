@@ -17,6 +17,7 @@ func New() *http.ServeMux {
 	mux.HandleFunc("/titre/", controller.Titre)
 	mux.HandleFunc("/inscription", controller.Inscription)
 	mux.HandleFunc("/connexion", controller.Connexion)
+	mux.HandleFunc("/deconnexion", controller.Deconnexion)
 
 	// Ajout des fichiers statiques
 	fileServer := http.FileServer(http.Dir("./assets"))
