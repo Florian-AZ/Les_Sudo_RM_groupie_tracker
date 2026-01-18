@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/">
+    <title>Sudo FM - Inscription</title>
+</head>
+
+<body>    
+    <nav>
+        <div>
+            <div>
+                <a href="/"><img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+            </div>
+            <div>
+                <a href="/recherche">Recherche</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div>
+            <div>
+                <h1>Inscription</h1>
+                <div>
+                    {{if .ErrInscription}}
+                        <p style="color:red;">Erreur lors de l'inscription : {{.ErrInscription}}</p>
+                    {{end}}
+                    <form method="POST" action="/inscription">
+                        <div>
+                            <!-- for="utilisateur" → lié à l'id="utilisateur". Cliquer sur le label place le curseur dans le champ -->
+                            <label for="utilisateur">Nom d'utilisateur :</label>
+                            <input type="text" id="utilisateur" name="utilisateur" required>
+                        </div>
+                        <div>
+                            <label for="MdP">Mot de passe :</label>
+                            <input type="password" id="MdP" name="MdP" required>
+                        </div>
+                        <div>
+                            <label for="MdPConf">Confirmer le mot de passe :</label>
+                            <input type="password" id="MdPConf" name="MdPConf" required>
+                        </div>
+                        <button type="submit">S'inscrire</button>
+                    </form>
+                </div>
+            </div>
+        </div>        
+    </main>
+</body>
+
+</html>

@@ -2,8 +2,10 @@ package data
 
 import (
 	"Groupie_Tracker/structure"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -359,4 +361,56 @@ func TemplateErreur(status int, errType string) structure.Html_Erreur {
 			Message: "Une erreur inconnue est survenue.",
 		}
 	}
+}
+
+func CreationCompte(nomUtilisateur string, mdp string) string {
+	// Récupération des données existantes //
+
+	// Lecture du fichier des utilisateurs
+	data, err := os.ReadFile("compte/compte.json")
+	if err != nil { //si erreur lors de la lecture
+		return err.Error() //retourne erreur
+	}
+
+	//si le fichier a des data on essaye de parser (récupération) en slice d'Utilisateur
+	// Déclaration de la slice des utilisateurs
+	var utilisateurs []structure.Utilisateur
+	if len(data) > 0 {
+		err := json.Unmarshal(data, &utilisateurs)
+		if err != nil { //decode json
+			return err.Error() //erreur si invalide
+		}
+	}
+
+	// Vérification et ajout du nouvel utilisateur //
+
+	// Vérification si l'utilisateur existe déjà
+	for _, u := range utilisateurs {
+		if u.Nom == nomUtilisateur {
+			return "Nom d'utilisateur déjà existant"
+		}
+	}
+
+	// Création du nouvel utilisateur
+	nouvelUtilisateur := structure.Utilisateur{
+		Nom:        nomUtilisateur,
+		MotDePasse: mdp,
+		Favoris:    []string{},
+	}
+
+	// Ajout du nouvel utilisateur à la liste
+	utilisateurs = append(utilisateurs, nouvelUtilisateur)
+
+	// Conversion de la liste des utilisateurs en JSON
+	utilisateursJSON, err := json.MarshalIndent(utilisateurs, "", "  ")
+	if err != nil {
+		return err.Error()
+	}
+
+	// Écriture dans le fichier
+	err = os.WriteFile("compte/compte.json", utilisateursJSON, 0644)
+	if err != nil {
+		return err.Error()
+	}
+	return "" //retourne chaîne vide si pas d'erreur
 }

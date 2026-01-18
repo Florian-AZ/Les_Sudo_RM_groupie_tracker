@@ -246,6 +246,40 @@ func Titre(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction pour afficher la page d'inscription
+func Inscription(w http.ResponseWriter, r *http.Request) {
+	var pagedata structure.PageData_Inscription
+	if r.Method != http.MethodPost {
+		pagedata = structure.PageData_Inscription{
+			ErrInscription: "",
+		}
+	} else {
+		// Récupération des données du formulaire
+		user := r.FormValue("utilisateur")
+		mdp := r.FormValue("MdP")
+		mdpConf := r.FormValue("MdPConf")
+		if mdp != mdpConf {
+			pagedata = structure.PageData_Inscription{
+				ErrInscription: "Les mots de passe ne correspondent pas.",
+			}
+		} else {
+			err := data.CreationCompte(user, mdp)
+			if err != "" {
+				pagedata = structure.PageData_Inscription{
+					ErrInscription: "Erreur lors de l'inscription: " + err,
+				}
+			} else {
+				// Redirige vers la page de connexion après une inscription réussie (code 303(requête GET))
+				http.Redirect(w, r, "/connexion", http.StatusSeeOther)
+				return
+			}
+		}
+	}
+
+	tmpl := template.Must(template.ParseFiles("template/inscription.html"))
+	tmpl.Execute(w, pagedata)
+}
+
 // Fonction pour afficher une page d'erreur
 func Erreur(w http.ResponseWriter, r *http.Request, status int, message string) {
 	pagedata := structure.PageData_Erreur{

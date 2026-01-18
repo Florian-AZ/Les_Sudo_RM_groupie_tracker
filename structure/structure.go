@@ -376,6 +376,10 @@ type PageData_Titre struct {
 	TrackData Html_TrackData
 }
 
+type PageData_Inscription struct {
+	ErrInscription string
+}
+
 // Structure de la pagination
 type Pagination struct {
 	Page       int
@@ -389,4 +393,12 @@ type PageData_Erreur struct {
 	LogIn         bool
 	ErreurStatus  int
 	ErreurMessage string
+}
+
+// Structure des données pour les utilisateurs et leurs favoris //
+
+type Utilisateur struct {
+	Nom        string   `json:"Nom"`
+	MotDePasse string   `json:"MotDePasse"`
+	Favoris    []string `json:"favoris"`
 }
