@@ -131,7 +131,9 @@ func TemplateHTMLArtist(Artist structure.Api_Artist, TopTracks structure.Api_Top
 	html_A.Artist.ArtistId = Artist.Id
 	html_A.Artist.ArtistName = Artist.Name
 	html_A.Artist.NbFollowers = Artist.Followers.Total
-	html_A.Artist.Genres = Artist.Genres
+	for _, A_genres := range Artist.Genres {
+		html_A.Artist.Genres = append(html_A.Artist.Genres, A_genres)
+	}
 	html_A.Artist.Images = GetImageAtIndex(Artist.Images, 1)
 	html_A.Artist.ArtistURL = Artist.URL.Spotify
 	// Données des Top Tracks

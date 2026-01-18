@@ -34,7 +34,18 @@
 
         <!-- Contenu de la page artiste -->
         <div>
+            <img src="{{.ArtistData.Artist.Images}}" alt="Image de l'artiste {{.ArtistData.Artist.ArtistName}}">
             <h1>{{.ArtistData.Artist.ArtistName}}</h1>
+            <h4><a href="{{.ArtistData.Artist.ArtistURL}}">Liens vers Spotify</a></h4>
+            <div>
+                <p>Followers : {{.ArtistData.Artist.NbFollowers}}</p>
+                <p>Genres : 
+                    {{range $i, $g := .ArtistData.Artist.Genres}}
+                        <!-- Si $i = 0 la condition est false, si > 0 lacondition est true donc on met une virgule -->
+                        {{if $i}}, {{end}}{{$g}}
+                    {{end}}
+                </p>
+            </div>
             <!-- Affichage des Top Tracks -->
             {{if .ArtistData.TopTracks}}
                 <h2>Top Titres</h2>
@@ -44,8 +55,11 @@
                         </div>
                     {{else}}
                         <ul>
-                            {{range $s, $i := .ArtistData.TopTracks}}
-                            <li><a href="/titre/{{$i.TrackId}}">{{$i.TrackName}}</a></li>
+                            {{range $i, $tt := .ArtistData.TopTracks}}
+                            <li>
+                                <img width="100" src="{{$tt.Images}}" alt="Image du titre {{$tt.TrackName}}">
+                                <a href="/titre/{{$tt.TrackId}}">{{$tt.TrackName}}</a>
+                            </li>
                             {{end}}
                         </ul> 
                     {{end}}
@@ -58,8 +72,11 @@
                 </div>
             {{end}}
             <ul>
-            {{range $s, $i := .ArtistData.Albums}}
-                <li><a href="/album/{{$i.AlbumId}}">{{$i.AlbumName}}</a></li>
+            {{range $i, $a := .ArtistData.Albums}}
+                <li>
+                    <img width="100" src="{{$a.Images}}" alt="Image de l'album {{$a.AlbumName}}">
+                    <a href="/album/{{$a.AlbumId}}">{{$a.AlbumName}}</a>
+                </li>
             {{end}}
             </ul>
             <!-- Pagination des Albums -->

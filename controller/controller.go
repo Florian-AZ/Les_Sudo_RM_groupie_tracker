@@ -89,7 +89,7 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 }
 
 func Artiste(w http.ResponseWriter, r *http.Request) {
-	// Récupération de l'ID de l'artiste depuis l'URL
+	// Récupération de l'ID de l'artiste depuis l'URL.
 	artistID := data.GetIdFromUrl(r)
 	// Si aucun ID n'est fourni
 	if artistID == "" {
