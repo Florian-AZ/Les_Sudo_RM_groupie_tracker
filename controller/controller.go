@@ -10,8 +10,10 @@ import (
 	"net/http"
 )
 
+// Initialisation des données de session
 var SessionData = data.InitSessionData()
 
+// Fonction pour afficher la page d'accueil
 func Home(w http.ResponseWriter, r *http.Request) {
 	// Déclaration de la variable qui va contenir les données de la page
 	pagedata := structure.PageData_Accueil{
@@ -22,6 +24,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction pour afficher la page de recherche
 func Recherche(w http.ResponseWriter, r *http.Request) {
 	/* Critère                       | GET                      | POST                              |
 	   | ----------------------------| -------------------------| ----------------------------------|
@@ -88,6 +91,7 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction pour afficher la page d'un artiste
 func Artiste(w http.ResponseWriter, r *http.Request) {
 	// Récupération de l'ID de l'artiste depuis l'URL.
 	artistID := data.GetIdFromUrl(r)
@@ -159,6 +163,7 @@ func Artiste(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction pour afficher la page d'un album
 func Album(w http.ResponseWriter, r *http.Request) {
 	albumID := data.GetIdFromUrl(r)
 	if albumID == "" {
@@ -171,14 +176,14 @@ func Album(w http.ResponseWriter, r *http.Request) {
 
 	token := token.GetValidToken()
 	if token == "" {
-		fmt.Printf("controller - Recherche - Erreur : Token invalide\n\n")
+		fmt.Printf("controller - Album - Erreur : Token invalide\n\n")
 		pagedata := data.TemplateErreur(500, "APP")
 		Erreur(w, r, pagedata.Status, pagedata.Message)
 		return
 	}
 	pagestr := r.URL.Query().Get("page")
 	page, offset := data.GetPageOffset(pagestr)
-	fmt.Printf("controller - Recherche - Page : %d | Offset : %d\n\n", page, offset)
+	fmt.Printf("controller - Album - Page : %d | Offset : %d\n\n", page, offset)
 
 	AlbumTracks := api.GetAlbum(token, albumID, offset)
 	if AlbumTracks.Error.Message != "" {
@@ -205,6 +210,43 @@ func Album(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction pour afficher la page d'un titre
+func Titre(w http.ResponseWriter, r *http.Request) {
+	trackID := data.GetIdFromUrl(r)
+	if trackID == "" {
+		fmt.Printf("controller - Titre - Aucun ID de titre fourni dans l'URL\n\n")
+		// Préparation des données d'erreur
+		pagedata := data.TemplateErreur(400, "APP")
+		Erreur(w, r, pagedata.Status, pagedata.Message)
+		return
+	}
+
+	token := token.GetValidToken()
+	if token == "" {
+		fmt.Printf("controller - Titre - Erreur : Token invalide\n\n")
+		pagedata := data.TemplateErreur(500, "APP")
+		Erreur(w, r, pagedata.Status, pagedata.Message)
+		return
+	}
+
+	track := api.GetTrack(token, trackID)
+	if track.Error.Message != "" {
+		fmt.Printf("controller - Titre - Erreur : %d %s\n\n", track.Error.Status, track.Error.Message)
+		pagedata := data.TemplateErreur(track.Error.Status, "API")
+		Erreur(w, r, pagedata.Status, pagedata.Message)
+		return
+	}
+	fmt.Printf("controller - Titre - Succès struct brut : %v\n\n", track)
+	htmldata := data.TemplateHTMLTrack(track)
+	pagedata := structure.PageData_Titre{
+		LogIn:     SessionData.LogIn,
+		TrackData: htmldata,
+	}
+	tmpl := template.Must(template.ParseFiles("template/titre.html"))
+	tmpl.Execute(w, pagedata)
+}
+
+// Fonction pour afficher une page d'erreur
 func Erreur(w http.ResponseWriter, r *http.Request, status int, message string) {
 	pagedata := structure.PageData_Erreur{
 		LogIn:         SessionData.LogIn,
@@ -215,6 +257,7 @@ func Erreur(w http.ResponseWriter, r *http.Request, status int, message string) 
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction de formatage et d'affichage des résultats de recherche dans la console
 func SearchFormatLog(S structure.Html_Recherche, query string) {
 	fmt.Printf("///////////////////////////////////////////\n")
 	fmt.Printf("Recherche : %s\n\n", query)

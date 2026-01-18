@@ -14,6 +14,7 @@ func New() *http.ServeMux {
 	mux.HandleFunc("/recherche", controller.Recherche)
 	mux.HandleFunc("/artiste/", controller.Artiste)
 	mux.HandleFunc("/album/", controller.Album)
+	mux.HandleFunc("/titre/", controller.Titre)
 
 	// Ajout des fichiers statiques
 	fileServer := http.FileServer(http.Dir("./assets"))

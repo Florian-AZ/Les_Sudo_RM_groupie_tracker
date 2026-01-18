@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/">
+    <title>Sudo FM - Titre</title>
+</head>
+
+<body>    
+    <nav>
+        <div>
+            <div>
+                <a href="/"><img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+            </div>
+            <div>
+                <a href="/recherche">Recherche</a>
+                {{if .LogIn}}
+                <a href="/favoris">Favoris</a>
+                <a href="/deconnexion">Se déconnecter</a>
+                {{else}}
+                <a href="/connexion">Se connecter</a>
+                <a href="/inscription">S'inscrire</a>
+                {{end}}
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        
+
+        
+
+        <!-- Contenu de la page titre -->
+        <div>
+            <img src="{{.TrackData.Images}}" alt="Image du titre {{.TrackData.TrackName}}">
+            <div></div>
+                <h1>{{.TrackData.TrackName}}</h1>
+                <!-- Target="_blank" ouvre le lien sur une nouvelle page -->
+                <h4><a href="{{.TrackData.TrackURL}}" target="_blank">Liens vers Spotify</a></h4>
+                <p>Date de sortie : {{.TrackData.ReleaseDate}}</p>
+                <p>Artistes : 
+                    {{range $index, $artist := .TrackData.Artists}}
+                        {{if $index}}, {{end}}<a href="/artiste/{{$artist.ArtistId}}">{{$artist.ArtistName}}</a>
+                    {{end}}
+                </p>
+                <p>Album : <a href="/album/{{.TrackData.AlbumId}}">{{.TrackData.AlbumName}}</a></p>
+                <p>Durée : {{.TrackData.DurationFormated}} min</p>
+            </div>
+            <!-- Intégration du player Spotify (récupérer directement depuis spotify)-->
+            <iframe data-testid="embed-iframe" 
+            style="border-radius:12px" 
+            src="https://open.spotify.com/embed/track/{{.TrackData.TrackId}}?utm_source=generator" 
+            width="100%" 
+            height="152" 
+            frameBorder="0" 
+            allowfullscreen="" 
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+            loading="lazy">
+            </iframe>
+        </div>
+        
+    </main>
+</body>
+
+</html>

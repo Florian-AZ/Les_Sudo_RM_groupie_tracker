@@ -194,6 +194,25 @@ func TemplateHTMLAlbums(AlbumTracks structure.Api_AlbumsTracks) structure.Html_A
 	return html_Al
 }
 
+func TemplateHTMLTrack(Track structure.Api_Track) structure.Html_TrackData {
+	// Remplissage des données pour le template HTML
+	var html_T structure.Html_TrackData
+	// Données du track
+	html_T.AlbumURL = Track.Album.URL.Spotify
+	html_T.AlbumId = Track.Album.Id
+	html_T.AlbumName = Track.Album.Name
+	html_T.ReleaseDate = Track.Album.ReleaseDate
+	html_T.TotalTracks = Track.Album.TotalTracks
+	html_T.Artists = FormatArtists(Track.Artists)
+	html_T.TrackName = Track.Name
+	html_T.DurationMs = Track.DurationMs
+	html_T.DurationFormated = FormatDuration(Track.DurationMs)
+	html_T.TrackURL = Track.URL.Spotify
+	html_T.TrackId = Track.Id
+	html_T.Images = GetImageAtIndex(Track.Album.Images, 1)
+	return html_T
+}
+
 // GetImageAtIndex vérifie si l'index de la slice d'images existe et retourne son URL, sinon retourne une chaîne vide
 func GetImageAtIndex(Img_Items []structure.Api_Images, index int) string {
 	if len(Img_Items) > index {
@@ -241,6 +260,7 @@ func GetPageOffset(pagestr string) (int, int) {
 	}
 	// Calcul de l'offset pour l'API Spotify (10 résultats par page). Exemple: page 1 -> offset 0, page 2 -> offset 10, page 3 -> offset 20
 	offset := (page - 1) * 10
+	fmt.Printf("data - GetPageOffset - Page : %d | Offset : %d\n\n", page, offset)
 	return page, offset
 }
 

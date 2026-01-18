@@ -371,6 +371,11 @@ type PageData_Album struct {
 	Pagination  Pagination
 }
 
+type PageData_Titre struct {
+	LogIn     bool
+	TrackData Html_TrackData
+}
+
 // Structure de la pagination
 type Pagination struct {
 	Page       int
