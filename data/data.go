@@ -16,8 +16,11 @@ func InitSessionData() *structure.SessionData {
 	fmt.Printf("data.InitSessionData - Initialisation des données de la session\n\n")
 	// Initialisation des données de la session
 	return &structure.SessionData{
-		Utilisateur: "",
-		LogIn:       false,
+		LogIn: false,
+		Utilisateur: structure.Utilisateur{
+			Nom:     "",
+			Favoris: []string{},
+		},
 	}
 }
 
@@ -364,6 +367,97 @@ func TemplateErreur(status int, errType string) structure.Html_Erreur {
 }
 
 func CreationCompte(nomUtilisateur string, mdp string) string {
+	//Verification si l'utilisateur existe déjà
+	if VerifUtilisateur(nomUtilisateur) == "" {
+		return "Nom d'utilisateur déjà existant"
+	}
+
+	// Récupération des données existantes //
+
+	// Lecture du fichier des utilisateurs
+	data, err := os.ReadFile("compte/compte.json")
+	if err != nil { //si erreur lors de la lecture
+		return err.Error() //retourne erreur
+	}
+
+	//si le fichier a des data on essaye de parser (récupération) en slice d'Utilisateur
+	// Déclaration de la slice des utilisateurs
+	var utilisateurs []structure.Utilisateur
+	if len(data) > 0 {
+		err := json.Unmarshal(data, &utilisateurs)
+		if err != nil { //decode json
+			return err.Error() //erreur si invalide
+		}
+	}
+
+	// Ajout du nouvel utilisateur //
+	// Création du nouvel utilisateur
+	nouvelUtilisateur := structure.Utilisateur{
+		Nom:        nomUtilisateur,
+		MotDePasse: mdp,
+		Favoris:    []string{},
+	}
+
+	// Ajout du nouvel utilisateur à la liste
+	utilisateurs = append(utilisateurs, nouvelUtilisateur)
+
+	// Conversion de la liste des utilisateurs en JSON
+	utilisateursJSON, err := json.MarshalIndent(utilisateurs, "", "  ")
+	if err != nil {
+		return err.Error()
+	}
+
+	// Écriture dans le fichier
+	// Permissions 0644 : propriétaire en lecture/écriture, groupe et autres en lecture seule
+	err = os.WriteFile("compte/compte.json", utilisateursJSON, 0644)
+	if err != nil {
+		return err.Error()
+	}
+	return "" //retourne chaîne vide si pas d'erreur
+}
+
+func ConnexionCompte(nomUtilisateur string, mdp string, sessionData *structure.SessionData) string {
+	//Verification si l'utilisateur existe déjà
+	if VerifUtilisateur(nomUtilisateur) != "" {
+		return "Utilisateur inéxistant. Veuillez vous inscrire."
+	}
+	// Récupération des données existantes //
+
+	// Lecture du fichier des utilisateurs
+	data, err := os.ReadFile("compte/compte.json")
+	if err != nil { //si erreur lors de la lecture
+		return err.Error() //retourne erreur
+	}
+
+	//si le fichier a des data on essaye de parser (récupération) en slice d'Utilisateur
+	// Déclaration de la slice des utilisateurs
+	var utilisateurs []structure.Utilisateur
+	if len(data) <= 0 {
+		return "Aucun utilisateur existant sur le système. Veuillez vous inscrire."
+	} else {
+		err := json.Unmarshal(data, &utilisateurs)
+		if err != nil { //decode json
+			return err.Error() //erreur si invalide
+		}
+	}
+	// Vérification des identifiants
+	for _, u := range utilisateurs {
+		if u.Nom == nomUtilisateur {
+			if u.MotDePasse == mdp {
+				// Connexion réussie
+				sessionData.LogIn = true
+				sessionData.Utilisateur = u
+				return ""
+			} else {
+				// Mot de passe incorrect
+				return "Mot de passe incorrect"
+			}
+		}
+	}
+	return "" //retourne chaîne vide si pas d'erreur
+}
+
+func VerifUtilisateur(nomUtilisateur string) string {
 	// Récupération des données existantes //
 
 	// Lecture du fichier des utilisateurs
@@ -387,30 +481,9 @@ func CreationCompte(nomUtilisateur string, mdp string) string {
 	// Vérification si l'utilisateur existe déjà
 	for _, u := range utilisateurs {
 		if u.Nom == nomUtilisateur {
-			return "Nom d'utilisateur déjà existant"
+			// Utilisateur trouvé
+			return ""
 		}
 	}
-
-	// Création du nouvel utilisateur
-	nouvelUtilisateur := structure.Utilisateur{
-		Nom:        nomUtilisateur,
-		MotDePasse: mdp,
-		Favoris:    []string{},
-	}
-
-	// Ajout du nouvel utilisateur à la liste
-	utilisateurs = append(utilisateurs, nouvelUtilisateur)
-
-	// Conversion de la liste des utilisateurs en JSON
-	utilisateursJSON, err := json.MarshalIndent(utilisateurs, "", "  ")
-	if err != nil {
-		return err.Error()
-	}
-
-	// Écriture dans le fichier
-	err = os.WriteFile("compte/compte.json", utilisateursJSON, 0644)
-	if err != nil {
-		return err.Error()
-	}
-	return "" //retourne chaîne vide si pas d'erreur
+	return "Utilisateur inéxistant"
 }

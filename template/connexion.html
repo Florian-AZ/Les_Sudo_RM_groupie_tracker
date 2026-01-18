@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/assets/">
-    <title>Sudo FM - Inscription</title>
+    <title>Sudo FM - Connexion</title>
 </head>
 
 <body>    
@@ -22,12 +22,12 @@
     <main>
         <div>
             <div>
-                <h1>Inscription</h1>
+                <h1>Connexion</h1>
                 <div>
                     {{if .Erreur}}
-                        <p style="color:red;">Erreur lors de l'inscription : {{.Erreur}}</p>
+                        <p style="color:red;">{{.Erreur}}</p>
                     {{end}}
-                    <form method="POST" action="/inscription">
+                    <form method="POST" action="/connexion">
                         <div>
                             <!-- for="utilisateur" → lié à l'id="utilisateur". Cliquer sur le label place le curseur dans le champ -->
                             <label for="utilisateur">Nom d'utilisateur :</label>
@@ -37,12 +37,10 @@
                             <label for="MdP">Mot de passe :</label>
                             <input type="password" id="MdP" name="MdP" required>
                         </div>
-                        <div>
-                            <label for="MdPConf">Confirmer le mot de passe :</label>
-                            <input type="password" id="MdPConf" name="MdPConf" required>
-                        </div>
-                        <button type="submit">S'inscrire</button>
+                        <button type="submit">Se connecter</button>
                     </form>
+
+                    <p>S'inscrire ? <a href="/inscription">Cliquez ici</a></p>
                 </div>
             </div>
         </div>        

@@ -1,8 +1,8 @@
 package structure
 
 type SessionData struct {
-	Utilisateur string
 	LogIn       bool
+	Utilisateur Utilisateur
 }
 
 // Ensemlble des structures pour l'API Spotify //
@@ -376,8 +376,8 @@ type PageData_Titre struct {
 	TrackData Html_TrackData
 }
 
-type PageData_Inscription struct {
-	ErrInscription string
+type PageData_Connexion_Inscription struct {
+	Erreur string
 }
 
 // Structure de la pagination
