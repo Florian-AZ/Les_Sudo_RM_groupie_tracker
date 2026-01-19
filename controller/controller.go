@@ -317,8 +317,12 @@ func Deconnexion(w http.ResponseWriter, r *http.Request) {
 			// Réinitialisation des données de session
 			SessionData.LogIn = false
 			SessionData.Utilisateur = structure.Utilisateur{
-				Nom:     "",
-				Favoris: []string{},
+				Nom: "",
+				Favoris: structure.Utilisateur_Favoris{
+					IdTitres:   []structure.Favoris_Id{},
+					IdArtistes: []structure.Favoris_Id{},
+					IdAlbums:   []structure.Favoris_Id{},
+				},
 			}
 			fmt.Printf("controller - Deconnexion - Utilisateur %s déconnecté avec succès\n\n", SessionData.Utilisateur.Nom)
 			// Redirige vers la page d'accueil après la déconnexion (code 303(requête GET))
@@ -329,6 +333,40 @@ func Deconnexion(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl := template.Must(template.ParseFiles("template/deconnexion.html"))
 	tmpl.Execute(w, nil)
+}
+
+func Favoris(w http.ResponseWriter, r *http.Request) {
+	if !SessionData.LogIn {
+		// Redirige vers la page de connexion si l'utilisateur n'est pas connecté
+		http.Redirect(w, r, "/connexion", http.StatusSeeOther)
+		return
+	}
+	token := token.GetValidToken()
+	if token == "" {
+		fmt.Printf("controller - Album - Erreur : Token invalide\n\n")
+		pagedata := data.TemplateErreur(500, "APP")
+		Erreur(w, r, pagedata.Status, pagedata.Message)
+		return
+	}
+
+	pagestr := r.URL.Query().Get("page")
+	page, offset := data.GetPageOffset(pagestr)
+	fmt.Printf("controller - Album - Page : %d | Offset : %d\n\n", page, offset)
+
+	htmlData := data.TemplateHTMLFavoris(SessionData.Utilisateur, token, offset)
+	pagedata := structure.PageData_Favoris{
+		NomUtilisateur: SessionData.Utilisateur.Nom,
+		Favoris:        htmlData,
+		Pagination: structure.Pagination{
+			Page:       page,
+			ASuivant:   (len(htmlData.Titres) > 10 || len(htmlData.Artistes) >= 10 || len(htmlData.Albums) >= 10),
+			APrecedent: page > 1,
+			PageSuiv:   page + 1,
+			PagePrec:   page - 1,
+		},
+	}
+	tmpl := template.Must(template.ParseFiles("template/favoris.html"))
+	tmpl.Execute(w, pagedata)
 }
 
 // Fonction pour afficher une page d'erreur

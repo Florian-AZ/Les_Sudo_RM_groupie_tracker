@@ -1,6 +1,7 @@
 package data
 
 import (
+	"Groupie_Tracker/api"
 	"Groupie_Tracker/structure"
 	"encoding/json"
 	"fmt"
@@ -18,8 +19,12 @@ func InitSessionData() *structure.SessionData {
 	return &structure.SessionData{
 		LogIn: false,
 		Utilisateur: structure.Utilisateur{
-			Nom:     "",
-			Favoris: []string{},
+			Nom: "",
+			Favoris: structure.Utilisateur_Favoris{
+				IdTitres:   []structure.Favoris_Id{},
+				IdArtistes: []structure.Favoris_Id{},
+				IdAlbums:   []structure.Favoris_Id{},
+			},
 		},
 	}
 }
@@ -218,6 +223,57 @@ func TemplateHTMLTrack(Track structure.Api_Track) structure.Html_TrackData {
 	return html_T
 }
 
+func TemplateHTMLFavoris(utilisateur structure.Utilisateur, token string, offset int) structure.Html_Favoris {
+	// Remplissage des données pour le template HTML
+
+	var html_F structure.Html_Favoris
+	if utilisateur.Favoris.IdTitres != nil {
+		html_F.Titres = []structure.Html_Favoris_Titre{}
+	} else {
+		for i := offset; i < offset+10 && i < len(utilisateur.Favoris.IdTitres); i++ {
+			// Récupération des données du titre via l'API Spotify
+			trackData := api.GetTrack(token, utilisateur.Favoris.IdTitres[i].Id)
+			// Transformation des données brutes en données pour le template HTML
+			html_T := TemplateHTMLTrack(trackData)
+			// Ajout aux favoris
+			favoris_Titre := structure.Html_Favoris_Titre{
+				Id:       html_T.TrackId,
+				Nom:      html_T.TrackName,
+				Artistes: html_T.Artists,
+				Image:    html_T.Images,
+				URL:      html_T.TrackURL,
+			}
+			html_F.Titres = append(html_F.Titres, favoris_Titre)
+		}
+
+	}
+	if utilisateur.Favoris.IdArtistes != nil {
+		html_F.Artistes = []structure.Html_Favoris_Artiste{}
+	} else {
+		for i := offset; i < offset+10 && i < len(utilisateur.Favoris.IdArtistes); i++ {
+			// Récupération des données du titre via l'API Spotify
+			trackData := api.GetArtistData(token, utilisateur.Favoris.IdArtistes[i].Id, 0)
+			// Transformation des données brutes en données pour le template HTML
+			html_T := TemplateHTMLArtist(trackData)
+			// Ajout aux favoris
+			favoris_Titre := structure.Html_Favoris_Titre{
+				Id:       html_T.TrackId,
+				Nom:      html_T.TrackName,
+				Artistes: html_T.Artists,
+				Image:    html_T.Images,
+				URL:      html_T.TrackURL,
+			}
+			html_F.Titres = append(html_F.Titres, favoris_Titre)
+		}
+
+	}
+	if utilisateur.Favoris.IdAlbums != nil {
+		html_F.Albums = []structure.Html_Favoris_Album{}
+	}
+
+	return html_F
+}
+
 // GetImageAtIndex vérifie si l'index de la slice d'images existe et retourne son URL, sinon retourne une chaîne vide
 func GetImageAtIndex(Img_Items []structure.Api_Images, index int) string {
 	if len(Img_Items) > index {
@@ -395,7 +451,11 @@ func CreationCompte(nomUtilisateur string, mdp string) string {
 	nouvelUtilisateur := structure.Utilisateur{
 		Nom:        nomUtilisateur,
 		MotDePasse: mdp,
-		Favoris:    []string{},
+		Favoris: structure.Utilisateur_Favoris{
+			IdTitres:   []structure.Favoris_Id{},
+			IdArtistes: []structure.Favoris_Id{},
+			IdAlbums:   []structure.Favoris_Id{},
+		},
 	}
 
 	// Ajout du nouvel utilisateur à la liste

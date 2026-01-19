@@ -341,6 +341,35 @@ type Html_Erreur struct {
 	Message string
 }
 
+type Html_Favoris struct {
+	Titres   []Html_Favoris_Titre
+	Artistes []Html_Favoris_Artiste
+	Albums   []Html_Favoris_Album
+}
+
+type Html_Favoris_Titre struct {
+	Id       string
+	Nom      string
+	Artistes []Html_Items_ArtistData
+	URL      string
+	Image    string
+}
+
+type Html_Favoris_Artiste struct {
+	Id    string
+	Nom   string
+	URL   string
+	Image string
+}
+
+type Html_Favoris_Album struct {
+	Id         string
+	Nom        string
+	DateSortie string
+	Artistes   []Html_Items_ArtistData
+	Image      string
+}
+
 // Ensemble des structures regroupant les données nécéssaires pour chaque page web //
 
 // Structure des données pour la page d'accueil
@@ -380,6 +409,18 @@ type PageData_Connexion_Inscription struct {
 	Erreur string
 }
 
+type PageData_Favoris struct {
+	NomUtilisateur string
+	Favoris        Html_Favoris
+	Pagination     Pagination
+}
+
+type PageData_Erreur struct {
+	LogIn         bool
+	ErreurStatus  int
+	ErreurMessage string
+}
+
 // Structure de la pagination
 type Pagination struct {
 	Page       int
@@ -389,16 +430,20 @@ type Pagination struct {
 	PagePrec   int
 }
 
-type PageData_Erreur struct {
-	LogIn         bool
-	ErreurStatus  int
-	ErreurMessage string
-}
-
 // Structure des données pour les utilisateurs et leurs favoris //
 
 type Utilisateur struct {
-	Nom        string   `json:"Nom"`
-	MotDePasse string   `json:"MotDePasse"`
-	Favoris    []string `json:"favoris"`
+	Nom        string              `json:"Nom"`
+	MotDePasse string              `json:"MotDePasse"`
+	Favoris    Utilisateur_Favoris `json:"favoris"`
+}
+
+type Utilisateur_Favoris struct {
+	IdTitres   []Favoris_Id `json:"id_titres"`
+	IdArtistes []Favoris_Id `json:"id_artistes"`
+	IdAlbums   []Favoris_Id `json:"id_albums"`
+}
+
+type Favoris_Id struct {
+	Id string `json:"id"`
 }
