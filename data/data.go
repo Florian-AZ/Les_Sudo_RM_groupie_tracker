@@ -146,36 +146,44 @@ func TemplateHTMLArtist(Artist structure.Api_Artist, TopTracks structure.Api_Top
 	}
 	html_A.Artist.Images = GetImageAtIndex(Artist.Images, 1)
 	html_A.Artist.ArtistURL = Artist.URL.Spotify
-	// Données des Top Tracks
-	for _, tt_items := range TopTracks.Tracks {
-		trackData := structure.Html_TrackData{
-			AlbumURL:         tt_items.Album.URL.Spotify,
-			AlbumId:          tt_items.Album.Id,
-			AlbumName:        tt_items.Album.Name,
-			ReleaseDate:      tt_items.Album.ReleaseDate,
-			TotalTracks:      tt_items.Album.TotalTracks,
-			Artists:          FormatArtists(tt_items.Artists),
-			TrackName:        tt_items.Name,
-			DurationMs:       tt_items.DurationMs,
-			DurationFormated: FormatDuration(tt_items.DurationMs),
-			TrackURL:         tt_items.URL.Spotify,
-			TrackId:          tt_items.Id,
-			Images:           GetImageAtIndex(tt_items.Album.Images, 1),
+	if len(TopTracks.Tracks) == 0 {
+		html_A.TopTracks = []structure.Html_TrackData{}
+	} else {
+		// Données des Top Tracks
+		for _, tt_items := range TopTracks.Tracks {
+			trackData := structure.Html_TrackData{
+				AlbumURL:         tt_items.Album.URL.Spotify,
+				AlbumId:          tt_items.Album.Id,
+				AlbumName:        tt_items.Album.Name,
+				ReleaseDate:      tt_items.Album.ReleaseDate,
+				TotalTracks:      tt_items.Album.TotalTracks,
+				Artists:          FormatArtists(tt_items.Artists),
+				TrackName:        tt_items.Name,
+				DurationMs:       tt_items.DurationMs,
+				DurationFormated: FormatDuration(tt_items.DurationMs),
+				TrackURL:         tt_items.URL.Spotify,
+				TrackId:          tt_items.Id,
+				Images:           GetImageAtIndex(tt_items.Album.Images, 1),
+			}
+			html_A.TopTracks = append(html_A.TopTracks, trackData)
 		}
-		html_A.TopTracks = append(html_A.TopTracks, trackData)
 	}
-	// Données des Albums
-	for _, alb_items := range Albums.Items {
-		albumData := structure.Html_AlbumData{
-			TotalTracks: alb_items.TotalTracks,
-			AlbumURL:    alb_items.URL.Spotify,
-			AlbumId:     alb_items.Id,
-			AlbumName:   alb_items.Name,
-			ReleaseDate: alb_items.ReleaseDate,
-			Artists:     FormatArtists(alb_items.Artists),
-			Images:      GetImageAtIndex(alb_items.Images, 1),
+	if len(Albums.Items) == 0 {
+		html_A.Albums = []structure.Html_AlbumData{}
+	} else {
+		// Données des Albums
+		for _, alb_items := range Albums.Items {
+			albumData := structure.Html_AlbumData{
+				TotalTracks: alb_items.TotalTracks,
+				AlbumURL:    alb_items.URL.Spotify,
+				AlbumId:     alb_items.Id,
+				AlbumName:   alb_items.Name,
+				ReleaseDate: alb_items.ReleaseDate,
+				Artists:     FormatArtists(alb_items.Artists),
+				Images:      GetImageAtIndex(alb_items.Images, 1),
+			}
+			html_A.Albums = append(html_A.Albums, albumData)
 		}
-		html_A.Albums = append(html_A.Albums, albumData)
 	}
 	return html_A
 }
@@ -184,6 +192,7 @@ func TemplateHTMLAlbums(AlbumTracks structure.Api_AlbumsTracks) structure.Html_A
 	// Remplissage des données pour le template HTML
 	var html_Al structure.Html_AlbumTracks
 	// Données de l'album
+	html_Al.AlbumURL = AlbumTracks.AlbumURL.Spotify
 	html_Al.AlbumID = AlbumTracks.AlbumID
 	html_Al.Images = GetImageAtIndex(AlbumTracks.Images, 1)
 	html_Al.AlbumName = AlbumTracks.AlbumName
@@ -213,7 +222,9 @@ func TemplateHTMLTrack(Track structure.Api_Track) structure.Html_TrackData {
 	html_T.AlbumName = Track.Album.Name
 	html_T.ReleaseDate = Track.Album.ReleaseDate
 	html_T.TotalTracks = Track.Album.TotalTracks
+
 	html_T.Artists = FormatArtists(Track.Artists)
+
 	html_T.TrackName = Track.Name
 	html_T.DurationMs = Track.DurationMs
 	html_T.DurationFormated = FormatDuration(Track.DurationMs)
@@ -227,7 +238,7 @@ func TemplateHTMLFavoris(utilisateur structure.Utilisateur, token string, offset
 	// Remplissage des données pour le template HTML
 
 	var html_F structure.Html_Favoris
-	if utilisateur.Favoris.IdTitres != nil {
+	if utilisateur.Favoris.IdTitres == nil {
 		html_F.Titres = []structure.Html_Favoris_Titre{}
 	} else {
 		for i := offset; i < offset+10 && i < len(utilisateur.Favoris.IdTitres); i++ {
@@ -247,30 +258,45 @@ func TemplateHTMLFavoris(utilisateur structure.Utilisateur, token string, offset
 		}
 
 	}
-	if utilisateur.Favoris.IdArtistes != nil {
+	if utilisateur.Favoris.IdArtistes == nil {
 		html_F.Artistes = []structure.Html_Favoris_Artiste{}
 	} else {
 		for i := offset; i < offset+10 && i < len(utilisateur.Favoris.IdArtistes); i++ {
-			// Récupération des données du titre via l'API Spotify
-			trackData := api.GetArtistData(token, utilisateur.Favoris.IdArtistes[i].Id, 0)
-			// Transformation des données brutes en données pour le template HTML
-			html_T := TemplateHTMLArtist(trackData)
-			// Ajout aux favoris
-			favoris_Titre := structure.Html_Favoris_Titre{
-				Id:       html_T.TrackId,
-				Nom:      html_T.TrackName,
-				Artistes: html_T.Artists,
-				Image:    html_T.Images,
-				URL:      html_T.TrackURL,
+			artistData := api.GetArtistData(token, utilisateur.Favoris.IdArtistes[i].Id, 0)
+
+			// On initialise des structures vides pour les Top Tracks et Albums afin de respecter la signature de la fonction
+			topTrackdata := structure.Api_TopTracks{Tracks: []structure.Api_Track{}}
+			albumData := structure.Api_ArtistAlbums{Items: []structure.Api_Albums{}}
+			html_Ar := TemplateHTMLArtist(artistData, topTrackdata, albumData)
+
+			favoris_Artiste := structure.Html_Favoris_Artiste{
+				Id:    html_Ar.Artist.ArtistId,
+				Nom:   html_Ar.Artist.ArtistName,
+				Image: html_Ar.Artist.Images,
+				URL:   html_Ar.Artist.ArtistURL,
 			}
-			html_F.Titres = append(html_F.Titres, favoris_Titre)
+			html_F.Artistes = append(html_F.Artistes, favoris_Artiste)
 		}
 
 	}
-	if utilisateur.Favoris.IdAlbums != nil {
+	if utilisateur.Favoris.IdAlbums == nil {
 		html_F.Albums = []structure.Html_Favoris_Album{}
-	}
+	} else {
+		for i := offset; i < offset+10 && i < len(utilisateur.Favoris.IdAlbums); i++ {
+			albumData := api.GetAlbum(token, utilisateur.Favoris.IdAlbums[i].Id, 0)
+			html_Al := TemplateHTMLAlbums(albumData)
 
+			favoris_Album := structure.Html_Favoris_Album{
+				Id:         html_Al.AlbumID,
+				Nom:        html_Al.AlbumName,
+				DateSortie: html_Al.Release_date,
+				Artistes:   html_Al.AlbumArtists,
+				Image:      html_Al.Images,
+				URL:        html_Al.AlbumURL,
+			}
+			html_F.Albums = append(html_F.Albums, favoris_Album)
+		}
+	}
 	return html_F
 }
 

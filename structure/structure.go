@@ -175,11 +175,12 @@ type Api_ArtistAlbums struct {
 }
 
 type Api_AlbumsTracks struct {
-	AlbumID      string       `json:"id"`
-	Images       []Api_Images `json:"images"`
-	AlbumName    string       `json:"name"`
-	Release_date string       `json:"release_date"`
-	AlbumArtists []Api_Artist `json:"artists"`
+	AlbumURL     Api_ExternalUrls `json:"external_urls"`
+	AlbumID      string           `json:"id"`
+	Images       []Api_Images     `json:"images"`
+	AlbumName    string           `json:"name"`
+	Release_date string           `json:"release_date"`
+	AlbumArtists []Api_Artist     `json:"artists"`
 	Tracks       struct {
 		Items []Api_AlbumsTracks_Items `json:"items"`
 	} `json:"tracks"`
@@ -312,6 +313,7 @@ type Html_AlbumData struct {
 }
 
 type Html_AlbumTracks struct {
+	AlbumURL     string
 	AlbumID      string
 	Images       string
 	AlbumName    string
@@ -368,6 +370,7 @@ type Html_Favoris_Album struct {
 	DateSortie string
 	Artistes   []Html_Items_ArtistData
 	Image      string
+	URL        string
 }
 
 // Ensemble des structures regroupant les données nécéssaires pour chaque page web //
