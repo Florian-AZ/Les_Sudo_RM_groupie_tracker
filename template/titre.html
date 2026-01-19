@@ -29,9 +29,25 @@
     <main>
         <!-- Contenu de la page titre -->
         <div>
+            <h1>Titre :</h1>
             <img src="{{.TrackData.Images}}" alt="Image du titre {{.TrackData.TrackName}}">
             <div></div>
-                <h1>{{.TrackData.TrackName}}</h1>
+                <h1>{{.TrackData.TrackName}}
+                    {{if .LogIn}}
+                        {{if .TrackData.IsFavoris}}
+                            <span><form action="" method="post">
+                                <input type="hidden" name="retirer_favoris" value="{{.TrackData.TrackId}}">
+                                <button type="submit" style="background:none; border:none; padding:0; cursor:pointer; font-size:1em;">★</button>
+                            </form></span>
+                        {{else}}
+                            <span>
+                                <span><form action="" method="post">
+                                <input type="hidden" name="ajout_favoris" value="{{.TrackData.TrackId}}">
+                                <button type="submit" style="background:none; border:none; padding:0; cursor:pointer; font-size:1em;">☆</button>
+                            </form></span>
+                        {{end}}
+                    {{end}}
+                </h1>
                 <!-- Target="_blank" ouvre le lien sur une nouvelle page -->
                 <h4><a href="{{.TrackData.TrackURL}}" target="_blank">Liens vers Spotify</a></h4>
                 <p>Date de sortie : {{.TrackData.ReleaseDate}}</p>
@@ -55,7 +71,6 @@
             loading="lazy">
             </iframe>
         </div>
-        
     </main>
 </body>
 

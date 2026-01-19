@@ -64,6 +64,13 @@
                                 <a href="/titre/{{$i.TrackId}}">
                                     {{$i.TrackName}} {{if $i.Artists}}par {{(index $i.Artists 0).ArtistName}}{{else}}Artiste inconnu{{end}}
                                 </a>
+                                {{if $.LogIn}}
+                                    {{if $i.IsFavoris}}
+                                        <span>★</span>
+                                    {{else}}
+                                        <span>☆</span>
+                                    {{end}}
+                                {{end}}
                             </li>
                         {{end}}
                     </ul>
@@ -79,6 +86,13 @@
                                 <a href="/artiste/{{.ArtistId}}">
                                     {{.ArtistName}} 
                                 </a>
+                                {{if $.LogIn}}
+                                    {{if .IsFavoris}}
+                                        <span>★</span>
+                                    {{else}}
+                                        <span>☆</span>
+                                    {{end}}
+                                {{end}}
                             </li>
                         {{end}}
                     </ul>
@@ -94,6 +108,13 @@
                                 <a href="/album/{{.AlbumId}}">
                                     {{.AlbumName}} - {{if .ReleaseDate}}{{.ReleaseDate}}{{end}}{{if .Artists}} - {{(index .Artists 0).ArtistName}}{{else}}Artiste inconnu{{end}}
                                 </a>
+                                {{if $.LogIn}}
+                                    {{if .IsFavoris}}
+                                        <span>★</span>
+                                    {{else}}
+                                        <span>☆</span>
+                                    {{end}}
+                                {{end}}
                             </li>
                         {{end}}
                     </ul>
@@ -103,8 +124,10 @@
                 {{if .Pagination.APrecedent}}
                     <a href="/recherche?search={{.SearchQuery}}&page={{.Pagination.PagePrec}}"><- Page précédente</a>
                 {{end}}
-                {{ if .PaginationAlbums.APrecedent or .PaginationAlbums.ASuivant}}
-                    <span>Page {{.PaginationAlbums.Page}}</span>
+                {{if .Pagination.APrecedent}}
+                    <span>Page {{ .Pagination.Page }}</span>
+                {{else if .Pagination.ASuivant}}
+                    <span>Page {{ .Pagination.Page }}</span>
                 {{end}}
                 {{if .Pagination.ASuivant}}
                     <a href="/recherche?search={{.SearchQuery}}&page={{.Pagination.PageSuiv}}">Page suivante -></a>

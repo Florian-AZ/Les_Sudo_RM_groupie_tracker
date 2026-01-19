@@ -198,7 +198,7 @@ type Api_AlbumsTracks_Items struct {
 type Api_Followers struct {
 	Total int `json:"total"`
 	/*JSON Structure
-	folowers
+	followers
 		total
 	*/
 }
@@ -289,6 +289,7 @@ type Html_TrackData struct {
 	TrackURL         string
 	TrackId          string
 	Images           string
+	IsFavoris        bool
 }
 
 // Sous-Structure de Html_Recherche pour les artists
@@ -299,6 +300,7 @@ type Html_ArtistData struct {
 	ArtistId    string
 	ArtistName  string
 	Images      string
+	IsFavoris   bool
 }
 
 // Sous-Structure de Html_Recherche pour les albums
@@ -310,6 +312,7 @@ type Html_AlbumData struct {
 	ReleaseDate string
 	Artists     []Html_Items_ArtistData
 	Images      string
+	IsFavoris   bool
 }
 
 type Html_AlbumTracks struct {
@@ -319,6 +322,7 @@ type Html_AlbumTracks struct {
 	AlbumName    string
 	Release_date string
 	AlbumArtists []Html_Items_ArtistData
+	IsFavoris    bool
 	Items        []Html_AlbumTracks_Items
 }
 

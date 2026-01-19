@@ -32,7 +32,7 @@ func InitSessionData() *structure.SessionData {
 //Restructuration des données obtenues via l'API Spotify en une structure plus lisible pour le template HTML
 
 // TemplateHTMLSearch → Transforme la réponse brute de l'API (Api_Recherche) en une structure plus lisible et prête pour le template HTML (Html_Recherche).
-func TemplateHTMLSearch(S structure.Api_Recherche) structure.Html_Recherche {
+func TemplateHTMLSearch(S structure.Api_Recherche, sessionData *structure.SessionData) structure.Html_Recherche {
 	// Remplissage des données pour le template HTML
 	var html_S structure.Html_Recherche
 	// Boucle pour les tracks
@@ -68,6 +68,7 @@ func TemplateHTMLSearch(S structure.Api_Recherche) structure.Html_Recherche {
 			TrackURL:         tra_items.URL.Spotify,
 			TrackId:          tra_items.Id,
 			Images:           GetImageAtIndex(tra_items.Album.Images, 1),
+			IsFavoris:        IsFavoris(tra_items.Id, "titre", sessionData),
 		}
 		html_S.TrackData = append(html_S.TrackData, trackData)
 
@@ -89,6 +90,7 @@ func TemplateHTMLSearch(S structure.Api_Recherche) structure.Html_Recherche {
 			ArtistId:    art_items.Id,
 			ArtistName:  art_items.Name,
 			Images:      GetImageAtIndex(art_items.Images, 1),
+			IsFavoris:   IsFavoris(art_items.Id, "artiste", sessionData),
 		}
 		html_S.ArtistData = append(html_S.ArtistData, artistData)
 	}
@@ -114,6 +116,7 @@ func TemplateHTMLSearch(S structure.Api_Recherche) structure.Html_Recherche {
 			ReleaseDate: alb_items.ReleaseDate,
 			Artists:     FormatArtists(alb_items.Artists),
 			Images:      GetImageAtIndex(alb_items.Images, 1),
+			IsFavoris:   IsFavoris(alb_items.Id, "album", sessionData),
 		}
 		html_S.AlbumData = append(html_S.AlbumData, albumData)
 	}
@@ -134,7 +137,7 @@ func FormatArtists(Artist_Items []structure.Api_Artist) []structure.Html_Items_A
 	return artists
 }
 
-func TemplateHTMLArtist(Artist structure.Api_Artist, TopTracks structure.Api_TopTracks, Albums structure.Api_ArtistAlbums) structure.Html_Artist {
+func TemplateHTMLArtist(Artist structure.Api_Artist, TopTracks structure.Api_TopTracks, Albums structure.Api_ArtistAlbums, sessionData *structure.SessionData) structure.Html_Artist {
 	// Remplissage des données pour le template HTML
 	var html_A structure.Html_Artist
 	// Données de l'artiste
@@ -146,6 +149,7 @@ func TemplateHTMLArtist(Artist structure.Api_Artist, TopTracks structure.Api_Top
 	}
 	html_A.Artist.Images = GetImageAtIndex(Artist.Images, 1)
 	html_A.Artist.ArtistURL = Artist.URL.Spotify
+	html_A.Artist.IsFavoris = IsFavoris(Artist.Id, "artiste", sessionData)
 	if len(TopTracks.Tracks) == 0 {
 		html_A.TopTracks = []structure.Html_TrackData{}
 	} else {
@@ -164,6 +168,7 @@ func TemplateHTMLArtist(Artist structure.Api_Artist, TopTracks structure.Api_Top
 				TrackURL:         tt_items.URL.Spotify,
 				TrackId:          tt_items.Id,
 				Images:           GetImageAtIndex(tt_items.Album.Images, 1),
+				IsFavoris:        IsFavoris(tt_items.Id, "titre", sessionData),
 			}
 			html_A.TopTracks = append(html_A.TopTracks, trackData)
 		}
@@ -181,6 +186,7 @@ func TemplateHTMLArtist(Artist structure.Api_Artist, TopTracks structure.Api_Top
 				ReleaseDate: alb_items.ReleaseDate,
 				Artists:     FormatArtists(alb_items.Artists),
 				Images:      GetImageAtIndex(alb_items.Images, 1),
+				IsFavoris:   IsFavoris(alb_items.Id, "album", sessionData),
 			}
 			html_A.Albums = append(html_A.Albums, albumData)
 		}
@@ -188,7 +194,7 @@ func TemplateHTMLArtist(Artist structure.Api_Artist, TopTracks structure.Api_Top
 	return html_A
 }
 
-func TemplateHTMLAlbums(AlbumTracks structure.Api_AlbumsTracks) structure.Html_AlbumTracks {
+func TemplateHTMLAlbums(AlbumTracks structure.Api_AlbumsTracks, sessionData *structure.SessionData) structure.Html_AlbumTracks {
 	// Remplissage des données pour le template HTML
 	var html_Al structure.Html_AlbumTracks
 	// Données de l'album
@@ -198,6 +204,7 @@ func TemplateHTMLAlbums(AlbumTracks structure.Api_AlbumsTracks) structure.Html_A
 	html_Al.AlbumName = AlbumTracks.AlbumName
 	html_Al.Release_date = AlbumTracks.Release_date
 	html_Al.AlbumArtists = FormatArtists(AlbumTracks.AlbumArtists)
+	html_Al.IsFavoris = IsFavoris(AlbumTracks.AlbumID, "album", sessionData)
 	// Données des Tracks de l'album
 	for _, at_items := range AlbumTracks.Tracks.Items {
 		trackData := structure.Html_AlbumTracks_Items{
@@ -213,7 +220,7 @@ func TemplateHTMLAlbums(AlbumTracks structure.Api_AlbumsTracks) structure.Html_A
 	return html_Al
 }
 
-func TemplateHTMLTrack(Track structure.Api_Track) structure.Html_TrackData {
+func TemplateHTMLTrack(Track structure.Api_Track, sessionData *structure.SessionData) structure.Html_TrackData {
 	// Remplissage des données pour le template HTML
 	var html_T structure.Html_TrackData
 	// Données du track
@@ -231,6 +238,7 @@ func TemplateHTMLTrack(Track structure.Api_Track) structure.Html_TrackData {
 	html_T.TrackURL = Track.URL.Spotify
 	html_T.TrackId = Track.Id
 	html_T.Images = GetImageAtIndex(Track.Album.Images, 1)
+	html_T.IsFavoris = IsFavoris(Track.Id, "titre", sessionData)
 	return html_T
 }
 
@@ -245,7 +253,7 @@ func TemplateHTMLFavoris(utilisateur structure.Utilisateur, token string, offset
 			// Récupération des données du titre via l'API Spotify
 			trackData := api.GetTrack(token, utilisateur.Favoris.IdTitres[i].Id)
 			// Transformation des données brutes en données pour le template HTML
-			html_T := TemplateHTMLTrack(trackData)
+			html_T := TemplateHTMLTrack(trackData, nil)
 			// Ajout aux favoris
 			favoris_Titre := structure.Html_Favoris_Titre{
 				Id:       html_T.TrackId,
@@ -267,7 +275,7 @@ func TemplateHTMLFavoris(utilisateur structure.Utilisateur, token string, offset
 			// On initialise des structures vides pour les Top Tracks et Albums afin de respecter la signature de la fonction
 			topTrackdata := structure.Api_TopTracks{Tracks: []structure.Api_Track{}}
 			albumData := structure.Api_ArtistAlbums{Items: []structure.Api_Albums{}}
-			html_Ar := TemplateHTMLArtist(artistData, topTrackdata, albumData)
+			html_Ar := TemplateHTMLArtist(artistData, topTrackdata, albumData, nil)
 
 			favoris_Artiste := structure.Html_Favoris_Artiste{
 				Id:    html_Ar.Artist.ArtistId,
@@ -284,7 +292,7 @@ func TemplateHTMLFavoris(utilisateur structure.Utilisateur, token string, offset
 	} else {
 		for i := offset; i < offset+10 && i < len(utilisateur.Favoris.IdAlbums); i++ {
 			albumData := api.GetAlbum(token, utilisateur.Favoris.IdAlbums[i].Id, 0)
-			html_Al := TemplateHTMLAlbums(albumData)
+			html_Al := TemplateHTMLAlbums(albumData, nil)
 
 			favoris_Album := structure.Html_Favoris_Album{
 				Id:         html_Al.AlbumID,
@@ -572,4 +580,134 @@ func VerifUtilisateur(nomUtilisateur string) string {
 		}
 	}
 	return "Utilisateur inéxistant"
+}
+
+func IsFavoris(id string, typ string, sessionData *structure.SessionData) bool {
+	if sessionData == nil || !sessionData.LogIn {
+		return false
+	}
+	// Vérifie si l'ID est dans les favoris de l'utilisateur selon le type (track, artist, album)
+	switch typ {
+	case "titre":
+		for _, fav := range sessionData.Utilisateur.Favoris.IdTitres {
+			if fav.Id == id {
+				return true
+			}
+		}
+	case "artiste":
+		for _, fav := range sessionData.Utilisateur.Favoris.IdArtistes {
+			if fav.Id == id {
+				return true
+			}
+		}
+	case "album":
+		for _, fav := range sessionData.Utilisateur.Favoris.IdAlbums {
+			if fav.Id == id {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func AjoutFavoris(id string, typ string, sessionData *structure.SessionData) {
+	// Ajoute l'ID aux favoris de l'utilisateur selon le type (track, artist, album)
+	switch typ {
+	case "titre":
+		sessionData.Utilisateur.Favoris.IdTitres = append(sessionData.Utilisateur.Favoris.IdTitres, structure.Favoris_Id{Id: id})
+	case "artiste":
+		sessionData.Utilisateur.Favoris.IdArtistes = append(sessionData.Utilisateur.Favoris.IdArtistes, structure.Favoris_Id{Id: id})
+	case "album":
+		sessionData.Utilisateur.Favoris.IdAlbums = append(sessionData.Utilisateur.Favoris.IdAlbums, structure.Favoris_Id{Id: id})
+	}
+	// Lecture du fichier
+	data, err := os.ReadFile("compte/compte.json")
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
+
+	// Décodage
+	var utilisateurs []structure.Utilisateur
+	if len(data) > 0 {
+		err := json.Unmarshal(data, &utilisateurs)
+		if err != nil {
+			fmt.Print(err.Error())
+			return
+		}
+	}
+
+	// Mise à jour utilisateur (PAR INDEX)
+	for i := range utilisateurs {
+		if utilisateurs[i].Nom == sessionData.Utilisateur.Nom {
+			utilisateurs[i].Favoris = sessionData.Utilisateur.Favoris
+			break
+		}
+	}
+
+	// Sauvegarde
+	utilisateursJSON, err := json.MarshalIndent(utilisateurs, "", "  ")
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
+
+	os.WriteFile("compte/compte.json", utilisateursJSON, 0644)
+}
+
+func RetirerFavoris(id string, typ string, sessionData *structure.SessionData) {
+	// Retire l'ID des favoris de l'utilisateur selon le type (track, artist, album)
+	switch typ {
+	case "titre":
+		for i, fav := range sessionData.Utilisateur.Favoris.IdTitres {
+			if fav.Id == id {
+				// Retirer l'élément en ré-sliceant, excluant l'élément à l'index i, et en concaténant les parties avant et après
+				sessionData.Utilisateur.Favoris.IdTitres = append(sessionData.Utilisateur.Favoris.IdTitres[:i], sessionData.Utilisateur.Favoris.IdTitres[i+1:]...)
+				break
+			}
+		}
+	case "artiste":
+		for i, fav := range sessionData.Utilisateur.Favoris.IdArtistes {
+			if fav.Id == id {
+				sessionData.Utilisateur.Favoris.IdArtistes = append(sessionData.Utilisateur.Favoris.IdArtistes[:i], sessionData.Utilisateur.Favoris.IdArtistes[i+1:]...)
+				break
+			}
+		}
+	case "album":
+		for i, fav := range sessionData.Utilisateur.Favoris.IdAlbums {
+			if fav.Id == id {
+				sessionData.Utilisateur.Favoris.IdAlbums = append(sessionData.Utilisateur.Favoris.IdAlbums[:i], sessionData.Utilisateur.Favoris.IdAlbums[i+1:]...)
+				break
+			}
+		}
+	}
+	// Lecture du fichier
+	data, err := os.ReadFile("compte/compte.json")
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
+	// Décodage
+	var utilisateurs []structure.Utilisateur
+	if len(data) > 0 {
+		err := json.Unmarshal(data, &utilisateurs)
+		if err != nil {
+			fmt.Print(err.Error())
+			return
+		}
+	}
+	// Mise à jour utilisateur (PAR INDEX)
+	for i := range utilisateurs {
+		if utilisateurs[i].Nom == sessionData.Utilisateur.Nom {
+			utilisateurs[i].Favoris = sessionData.Utilisateur.Favoris
+			break
+		}
+	}
+	// Sauvegarde
+	utilisateursJSON, err := json.MarshalIndent(utilisateurs, "", "  ")
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
+	os.WriteFile("compte/compte.json", utilisateursJSON, 0644)
 }

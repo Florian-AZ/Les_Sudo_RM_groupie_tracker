@@ -63,11 +63,12 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 			// Si la recherche est un succès
 		} else {
 			// Restructuration des données brutes en données prêtes pour le template HTML
-			htmlData := data.TemplateHTMLSearch(Recherche)
+			htmlData := data.TemplateHTMLSearch(Recherche, SessionData)
 			fmt.Printf("controller - Recherche - Succès struct HTML brut : %v\n\n", htmlData)
 			SearchFormatLog(htmlData, query)
 			// Remplissage des données de la page de recherche
 			pagedata = structure.PageData_Recherche{
+				LogIn:       SessionData.LogIn,
 				SearchData:  htmlData,
 				SearchQuery: query,
 				Pagination: structure.Pagination{
@@ -104,10 +105,31 @@ func Artiste(w http.ResponseWriter, r *http.Request) {
 		Erreur(w, r, pagedata.Status, pagedata.Message)
 		return
 	}
+	if r.Method == http.MethodPost {
+		// Gestion des ajouts/suppressions de favoris
+		ajoutFavorisID := r.FormValue("ajout_favoris")
+		retirerFavorisID := r.FormValue("retirer_favoris")
+		if ajoutFavorisID != "" {
+			if !data.IsFavoris(ajoutFavorisID, "artiste", SessionData) {
+				data.AjoutFavoris(ajoutFavorisID, "artiste", SessionData)
+				fmt.Printf("controller - Artiste - Ajout aux favoris : ID %s\n\n", ajoutFavorisID)
+			} else {
+				fmt.Printf("controller - Artiste - L'artiste ID %s est déjà dans les favoris\n\n", ajoutFavorisID)
+			}
+		}
+		if retirerFavorisID != "" {
+			if data.IsFavoris(retirerFavorisID, "artiste", SessionData) {
+				data.RetirerFavoris(retirerFavorisID, "artiste", SessionData)
+				fmt.Printf("controller - Artiste - Retrait des favoris : ID %s\n\n", retirerFavorisID)
+			} else {
+				fmt.Printf("controller - Artiste - L'artiste ID %s n'est pas dans les favoris\n\n", retirerFavorisID)
+			}
+		}
+	}
 	// Récupération d'un token valide
 	token := token.GetValidToken()
 	if token == "" {
-		fmt.Printf("controller - Recherche - Erreur : Token invalide\n\n")
+		fmt.Printf("controller - Artiste - Erreur : Token invalide\n\n")
 		pagedata := data.TemplateErreur(500, "APP")
 		Erreur(w, r, pagedata.Status, pagedata.Message)
 		return
@@ -123,7 +145,6 @@ func Artiste(w http.ResponseWriter, r *http.Request) {
 	// Si la récupération des données de l'artiste est un succès
 	fmt.Printf("controller - Artiste - Succès struct brut : %v\n\n", ArtisteData)
 
-	var pagestr string
 	//Artist Top Tracks
 
 	ArtistTopTracks := api.GetArtistTopTracks(token, artistID)
@@ -134,7 +155,7 @@ func Artiste(w http.ResponseWriter, r *http.Request) {
 
 	//Artist Albums
 	// Récupération du paramètre GET "pageAlbums" de l'URL pour la pagination
-	pagestr = r.URL.Query().Get("pageAlbums")
+	pagestr := r.URL.Query().Get("pageAlbums")
 	pageAlbums, offset := data.GetPageOffset(pagestr)
 
 	ArtistAlbums := api.GetArtistAlbums(token, artistID, offset)
@@ -144,7 +165,7 @@ func Artiste(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Remplissage des données de la page de l'artiste
-	htmldata := data.TemplateHTMLArtist(ArtisteData, ArtistTopTracks, ArtistAlbums)
+	htmldata := data.TemplateHTMLArtist(ArtisteData, ArtistTopTracks, ArtistAlbums, SessionData)
 	pagedata := structure.PageData_Artiste{
 		LogIn:      SessionData.LogIn,
 		ArtistData: htmldata,
@@ -173,7 +194,27 @@ func Album(w http.ResponseWriter, r *http.Request) {
 		Erreur(w, r, pagedata.Status, pagedata.Message)
 		return
 	}
-
+	if r.Method == http.MethodPost {
+		// Gestion des ajouts/suppressions de favoris
+		ajoutFavorisID := r.FormValue("ajout_favoris")
+		retirerFavorisID := r.FormValue("retirer_favoris")
+		if ajoutFavorisID != "" {
+			if !data.IsFavoris(albumID, "album", SessionData) {
+				data.AjoutFavoris(ajoutFavorisID, "album", SessionData)
+				fmt.Printf("controller - Album - Ajout aux favoris : ID %s\n\n", ajoutFavorisID)
+			} else {
+				fmt.Printf("controller - Album - L'album ID %s est déjà dans les favoris\n\n", albumID)
+			}
+		}
+		if retirerFavorisID != "" {
+			if data.IsFavoris(albumID, "album", SessionData) {
+				data.RetirerFavoris(retirerFavorisID, "album", SessionData)
+				fmt.Printf("controller - Album - Retrait des favoris : ID %s\n\n", retirerFavorisID)
+			} else {
+				fmt.Printf("controller - Album - L'album ID %s n'est pas dans les favoris\n\n", albumID)
+			}
+		}
+	}
 	token := token.GetValidToken()
 	if token == "" {
 		fmt.Printf("controller - Album - Erreur : Token invalide\n\n")
@@ -193,7 +234,7 @@ func Album(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("controller - Album - Succès struct brut : %v\n\n", AlbumTracks)
-	htmldata := data.TemplateHTMLAlbums(AlbumTracks)
+	htmldata := data.TemplateHTMLAlbums(AlbumTracks, SessionData)
 	pagedata := structure.PageData_Album{
 		LogIn:       SessionData.LogIn,
 		AlbumTracks: htmldata,
@@ -221,6 +262,28 @@ func Titre(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Method == http.MethodPost {
+		// Gestion des ajouts/suppressions de favoris
+		ajoutFavorisID := r.FormValue("ajout_favoris")
+		retirerFavorisID := r.FormValue("retirer_favoris")
+		if ajoutFavorisID != "" {
+			if !data.IsFavoris(trackID, "titre", SessionData) {
+				data.AjoutFavoris(ajoutFavorisID, "titre", SessionData)
+				fmt.Printf("controller - Titre - Ajout aux favoris : ID %s\n\n", ajoutFavorisID)
+			} else {
+				fmt.Printf("controller - Titre - Le titre ID %s est déjà dans les favoris\n\n", trackID)
+			}
+		}
+		if retirerFavorisID != "" {
+			if data.IsFavoris(trackID, "titre", SessionData) {
+				data.RetirerFavoris(retirerFavorisID, "titre", SessionData)
+				fmt.Printf("controller - Titre - Retrait des favoris : ID %s\n\n", retirerFavorisID)
+			} else {
+				fmt.Printf("controller - Titre - Le titre ID %s n'est pas dans les favoris\n\n", trackID)
+			}
+		}
+	}
+
 	token := token.GetValidToken()
 	if token == "" {
 		fmt.Printf("controller - Titre - Erreur : Token invalide\n\n")
@@ -237,7 +300,7 @@ func Titre(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("controller - Titre - Succès struct brut : %v\n\n", track)
-	htmldata := data.TemplateHTMLTrack(track)
+	htmldata := data.TemplateHTMLTrack(track, SessionData)
 	pagedata := structure.PageData_Titre{
 		LogIn:     SessionData.LogIn,
 		TrackData: htmldata,
@@ -248,6 +311,11 @@ func Titre(w http.ResponseWriter, r *http.Request) {
 
 // Fonction pour afficher la page d'inscription
 func Inscription(w http.ResponseWriter, r *http.Request) {
+	if SessionData.LogIn {
+		// Redirige vers la page d'accueil si l'utilisateur est déjà connecté
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 	var pagedata structure.PageData_Connexion_Inscription
 	if r.Method != http.MethodPost {
 		pagedata = structure.PageData_Connexion_Inscription{
@@ -266,7 +334,7 @@ func Inscription(w http.ResponseWriter, r *http.Request) {
 			err := data.CreationCompte(user, mdp)
 			if err != "" {
 				pagedata = structure.PageData_Connexion_Inscription{
-					Erreur: "Erreur lors de l'inscription: " + err,
+					Erreur: err,
 				}
 			} else {
 				fmt.Printf("controller - Inscription - Utilisateur %s inscrit avec succès\n\n", user)
@@ -283,6 +351,10 @@ func Inscription(w http.ResponseWriter, r *http.Request) {
 
 // Fonction pour afficher la page d'connexion
 func Connexion(w http.ResponseWriter, r *http.Request) {
+	if SessionData.LogIn {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 	var pagedata structure.PageData_Connexion_Inscription
 	if r.Method != http.MethodPost {
 		pagedata = structure.PageData_Connexion_Inscription{
@@ -312,6 +384,10 @@ func Connexion(w http.ResponseWriter, r *http.Request) {
 
 // Fonction pour déconnecter l'utilisateur
 func Deconnexion(w http.ResponseWriter, r *http.Request) {
+	if !SessionData.LogIn {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 	if r.Method == http.MethodPost {
 		if r.FormValue("deconnexion") == "true" {
 			// Réinitialisation des données de session
@@ -337,10 +413,11 @@ func Deconnexion(w http.ResponseWriter, r *http.Request) {
 
 func Favoris(w http.ResponseWriter, r *http.Request) {
 	if !SessionData.LogIn {
-		// Redirige vers la page de connexion si l'utilisateur n'est pas connecté
-		http.Redirect(w, r, "/connexion", http.StatusSeeOther)
+		// Redirige vers la page d'accueil si l'utilisateur n'est pas connecté
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
+
 	token := token.GetValidToken()
 	if token == "" {
 		fmt.Printf("controller - Album - Erreur : Token invalide\n\n")
