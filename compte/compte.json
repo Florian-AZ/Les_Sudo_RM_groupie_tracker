@@ -1,0 +1,11 @@
+[
+  {
+    "Nom": "Admin",
+    "MotDePasse": "0",
+    "favoris": {
+      "id_titres": null,
+      "id_artistes": null,
+      "id_albums": null
+    }
+  }
+]

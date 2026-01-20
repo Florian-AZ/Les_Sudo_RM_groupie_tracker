@@ -1,8 +1,8 @@
 package structure
 
 type SessionData struct {
-	Utilisateur string
 	LogIn       bool
+	Utilisateur Utilisateur
 }
 
 // Ensemlble des structures pour l'API Spotify //
@@ -175,11 +175,12 @@ type Api_ArtistAlbums struct {
 }
 
 type Api_AlbumsTracks struct {
-	AlbumID      string       `json:"id"`
-	Images       []Api_Images `json:"images"`
-	AlbumName    string       `json:"name"`
-	Release_date string       `json:"release_date"`
-	AlbumArtists []Api_Artist `json:"artists"`
+	AlbumURL     Api_ExternalUrls `json:"external_urls"`
+	AlbumID      string           `json:"id"`
+	Images       []Api_Images     `json:"images"`
+	AlbumName    string           `json:"name"`
+	Release_date string           `json:"release_date"`
+	AlbumArtists []Api_Artist     `json:"artists"`
 	Tracks       struct {
 		Items []Api_AlbumsTracks_Items `json:"items"`
 	} `json:"tracks"`
@@ -197,7 +198,7 @@ type Api_AlbumsTracks_Items struct {
 type Api_Followers struct {
 	Total int `json:"total"`
 	/*JSON Structure
-	folowers
+	followers
 		total
 	*/
 }
@@ -288,6 +289,7 @@ type Html_TrackData struct {
 	TrackURL         string
 	TrackId          string
 	Images           string
+	IsFavoris        bool
 }
 
 // Sous-Structure de Html_Recherche pour les artists
@@ -298,6 +300,7 @@ type Html_ArtistData struct {
 	ArtistId    string
 	ArtistName  string
 	Images      string
+	IsFavoris   bool
 }
 
 // Sous-Structure de Html_Recherche pour les albums
@@ -309,14 +312,17 @@ type Html_AlbumData struct {
 	ReleaseDate string
 	Artists     []Html_Items_ArtistData
 	Images      string
+	IsFavoris   bool
 }
 
 type Html_AlbumTracks struct {
+	AlbumURL     string
 	AlbumID      string
 	Images       string
 	AlbumName    string
 	Release_date string
 	AlbumArtists []Html_Items_ArtistData
+	IsFavoris    bool
 	Items        []Html_AlbumTracks_Items
 }
 
@@ -339,6 +345,36 @@ type Html_Items_ArtistData struct {
 type Html_Erreur struct {
 	Status  int
 	Message string
+}
+
+type Html_Favoris struct {
+	Titres   []Html_Favoris_Titre
+	Artistes []Html_Favoris_Artiste
+	Albums   []Html_Favoris_Album
+}
+
+type Html_Favoris_Titre struct {
+	Id       string
+	Nom      string
+	Artistes []Html_Items_ArtistData
+	URL      string
+	Image    string
+}
+
+type Html_Favoris_Artiste struct {
+	Id    string
+	Nom   string
+	URL   string
+	Image string
+}
+
+type Html_Favoris_Album struct {
+	Id         string
+	Nom        string
+	DateSortie string
+	Artistes   []Html_Items_ArtistData
+	Image      string
+	URL        string
 }
 
 // Ensemble des structures regroupant les données nécéssaires pour chaque page web //
@@ -371,6 +407,27 @@ type PageData_Album struct {
 	Pagination  Pagination
 }
 
+type PageData_Titre struct {
+	LogIn     bool
+	TrackData Html_TrackData
+}
+
+type PageData_Connexion_Inscription struct {
+	Erreur string
+}
+
+type PageData_Favoris struct {
+	NomUtilisateur string
+	Favoris        Html_Favoris
+	Pagination     Pagination
+}
+
+type PageData_Erreur struct {
+	LogIn         bool
+	ErreurStatus  int
+	ErreurMessage string
+}
+
 // Structure de la pagination
 type Pagination struct {
 	Page       int
@@ -380,8 +437,20 @@ type Pagination struct {
 	PagePrec   int
 }
 
-type PageData_Erreur struct {
-	LogIn         bool
-	ErreurStatus  int
-	ErreurMessage string
+// Structure des données pour les utilisateurs et leurs favoris //
+
+type Utilisateur struct {
+	Nom        string              `json:"Nom"`
+	MotDePasse string              `json:"MotDePasse"`
+	Favoris    Utilisateur_Favoris `json:"favoris"`
+}
+
+type Utilisateur_Favoris struct {
+	IdTitres   []Favoris_Id `json:"id_titres"`
+	IdArtistes []Favoris_Id `json:"id_artistes"`
+	IdAlbums   []Favoris_Id `json:"id_albums"`
+}
+
+type Favoris_Id struct {
+	Id string `json:"id"`
 }

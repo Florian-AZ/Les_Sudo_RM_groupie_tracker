@@ -10,8 +10,10 @@ import (
 	"net/http"
 )
 
+// Initialisation des données de session
 var SessionData = data.InitSessionData()
 
+// Fonction pour afficher la page d'accueil
 func Home(w http.ResponseWriter, r *http.Request) {
 	// Déclaration de la variable qui va contenir les données de la page
 	pagedata := structure.PageData_Accueil{
@@ -22,6 +24,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction pour afficher la page de recherche
 func Recherche(w http.ResponseWriter, r *http.Request) {
 	/* Critère                       | GET                      | POST                              |
 	   | ----------------------------| -------------------------| ----------------------------------|
@@ -60,11 +63,12 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 			// Si la recherche est un succès
 		} else {
 			// Restructuration des données brutes en données prêtes pour le template HTML
-			htmlData := data.TemplateHTMLSearch(Recherche)
+			htmlData := data.TemplateHTMLSearch(Recherche, SessionData)
 			fmt.Printf("controller - Recherche - Succès struct HTML brut : %v\n\n", htmlData)
 			SearchFormatLog(htmlData, query)
 			// Remplissage des données de la page de recherche
 			pagedata = structure.PageData_Recherche{
+				LogIn:       SessionData.LogIn,
 				SearchData:  htmlData,
 				SearchQuery: query,
 				Pagination: structure.Pagination{
@@ -88,8 +92,9 @@ func Recherche(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction pour afficher la page d'un artiste
 func Artiste(w http.ResponseWriter, r *http.Request) {
-	// Récupération de l'ID de l'artiste depuis l'URL
+	// Récupération de l'ID de l'artiste depuis l'URL.
 	artistID := data.GetIdFromUrl(r)
 	// Si aucun ID n'est fourni
 	if artistID == "" {
@@ -100,10 +105,31 @@ func Artiste(w http.ResponseWriter, r *http.Request) {
 		Erreur(w, r, pagedata.Status, pagedata.Message)
 		return
 	}
+	if r.Method == http.MethodPost {
+		// Gestion des ajouts/suppressions de favoris
+		ajoutFavorisID := r.FormValue("ajout_favoris")
+		retirerFavorisID := r.FormValue("retirer_favoris")
+		if ajoutFavorisID != "" {
+			if !data.IsFavoris(ajoutFavorisID, "artiste", SessionData) {
+				data.AjoutFavoris(ajoutFavorisID, "artiste", SessionData)
+				fmt.Printf("controller - Artiste - Ajout aux favoris : ID %s\n\n", ajoutFavorisID)
+			} else {
+				fmt.Printf("controller - Artiste - L'artiste ID %s est déjà dans les favoris\n\n", ajoutFavorisID)
+			}
+		}
+		if retirerFavorisID != "" {
+			if data.IsFavoris(retirerFavorisID, "artiste", SessionData) {
+				data.RetirerFavoris(retirerFavorisID, "artiste", SessionData)
+				fmt.Printf("controller - Artiste - Retrait des favoris : ID %s\n\n", retirerFavorisID)
+			} else {
+				fmt.Printf("controller - Artiste - L'artiste ID %s n'est pas dans les favoris\n\n", retirerFavorisID)
+			}
+		}
+	}
 	// Récupération d'un token valide
 	token := token.GetValidToken()
 	if token == "" {
-		fmt.Printf("controller - Recherche - Erreur : Token invalide\n\n")
+		fmt.Printf("controller - Artiste - Erreur : Token invalide\n\n")
 		pagedata := data.TemplateErreur(500, "APP")
 		Erreur(w, r, pagedata.Status, pagedata.Message)
 		return
@@ -119,7 +145,6 @@ func Artiste(w http.ResponseWriter, r *http.Request) {
 	// Si la récupération des données de l'artiste est un succès
 	fmt.Printf("controller - Artiste - Succès struct brut : %v\n\n", ArtisteData)
 
-	var pagestr string
 	//Artist Top Tracks
 
 	ArtistTopTracks := api.GetArtistTopTracks(token, artistID)
@@ -130,7 +155,7 @@ func Artiste(w http.ResponseWriter, r *http.Request) {
 
 	//Artist Albums
 	// Récupération du paramètre GET "pageAlbums" de l'URL pour la pagination
-	pagestr = r.URL.Query().Get("pageAlbums")
+	pagestr := r.URL.Query().Get("pageAlbums")
 	pageAlbums, offset := data.GetPageOffset(pagestr)
 
 	ArtistAlbums := api.GetArtistAlbums(token, artistID, offset)
@@ -140,7 +165,7 @@ func Artiste(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Remplissage des données de la page de l'artiste
-	htmldata := data.TemplateHTMLArtist(ArtisteData, ArtistTopTracks, ArtistAlbums)
+	htmldata := data.TemplateHTMLArtist(ArtisteData, ArtistTopTracks, ArtistAlbums, SessionData)
 	pagedata := structure.PageData_Artiste{
 		LogIn:      SessionData.LogIn,
 		ArtistData: htmldata,
@@ -159,6 +184,7 @@ func Artiste(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction pour afficher la page d'un album
 func Album(w http.ResponseWriter, r *http.Request) {
 	albumID := data.GetIdFromUrl(r)
 	if albumID == "" {
@@ -168,17 +194,37 @@ func Album(w http.ResponseWriter, r *http.Request) {
 		Erreur(w, r, pagedata.Status, pagedata.Message)
 		return
 	}
-
+	if r.Method == http.MethodPost {
+		// Gestion des ajouts/suppressions de favoris
+		ajoutFavorisID := r.FormValue("ajout_favoris")
+		retirerFavorisID := r.FormValue("retirer_favoris")
+		if ajoutFavorisID != "" {
+			if !data.IsFavoris(albumID, "album", SessionData) {
+				data.AjoutFavoris(ajoutFavorisID, "album", SessionData)
+				fmt.Printf("controller - Album - Ajout aux favoris : ID %s\n\n", ajoutFavorisID)
+			} else {
+				fmt.Printf("controller - Album - L'album ID %s est déjà dans les favoris\n\n", albumID)
+			}
+		}
+		if retirerFavorisID != "" {
+			if data.IsFavoris(albumID, "album", SessionData) {
+				data.RetirerFavoris(retirerFavorisID, "album", SessionData)
+				fmt.Printf("controller - Album - Retrait des favoris : ID %s\n\n", retirerFavorisID)
+			} else {
+				fmt.Printf("controller - Album - L'album ID %s n'est pas dans les favoris\n\n", albumID)
+			}
+		}
+	}
 	token := token.GetValidToken()
 	if token == "" {
-		fmt.Printf("controller - Recherche - Erreur : Token invalide\n\n")
+		fmt.Printf("controller - Album - Erreur : Token invalide\n\n")
 		pagedata := data.TemplateErreur(500, "APP")
 		Erreur(w, r, pagedata.Status, pagedata.Message)
 		return
 	}
 	pagestr := r.URL.Query().Get("page")
 	page, offset := data.GetPageOffset(pagestr)
-	fmt.Printf("controller - Recherche - Page : %d | Offset : %d\n\n", page, offset)
+	fmt.Printf("controller - Album - Page : %d | Offset : %d\n\n", page, offset)
 
 	AlbumTracks := api.GetAlbum(token, albumID, offset)
 	if AlbumTracks.Error.Message != "" {
@@ -188,7 +234,7 @@ func Album(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("controller - Album - Succès struct brut : %v\n\n", AlbumTracks)
-	htmldata := data.TemplateHTMLAlbums(AlbumTracks)
+	htmldata := data.TemplateHTMLAlbums(AlbumTracks, SessionData)
 	pagedata := structure.PageData_Album{
 		LogIn:       SessionData.LogIn,
 		AlbumTracks: htmldata,
@@ -205,6 +251,202 @@ func Album(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction pour afficher la page d'un titre
+func Titre(w http.ResponseWriter, r *http.Request) {
+	trackID := data.GetIdFromUrl(r)
+	if trackID == "" {
+		fmt.Printf("controller - Titre - Aucun ID de titre fourni dans l'URL\n\n")
+		// Préparation des données d'erreur
+		pagedata := data.TemplateErreur(400, "APP")
+		Erreur(w, r, pagedata.Status, pagedata.Message)
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		// Gestion des ajouts/suppressions de favoris
+		ajoutFavorisID := r.FormValue("ajout_favoris")
+		retirerFavorisID := r.FormValue("retirer_favoris")
+		if ajoutFavorisID != "" {
+			if !data.IsFavoris(trackID, "titre", SessionData) {
+				data.AjoutFavoris(ajoutFavorisID, "titre", SessionData)
+				fmt.Printf("controller - Titre - Ajout aux favoris : ID %s\n\n", ajoutFavorisID)
+			} else {
+				fmt.Printf("controller - Titre - Le titre ID %s est déjà dans les favoris\n\n", trackID)
+			}
+		}
+		if retirerFavorisID != "" {
+			if data.IsFavoris(trackID, "titre", SessionData) {
+				data.RetirerFavoris(retirerFavorisID, "titre", SessionData)
+				fmt.Printf("controller - Titre - Retrait des favoris : ID %s\n\n", retirerFavorisID)
+			} else {
+				fmt.Printf("controller - Titre - Le titre ID %s n'est pas dans les favoris\n\n", trackID)
+			}
+		}
+	}
+
+	token := token.GetValidToken()
+	if token == "" {
+		fmt.Printf("controller - Titre - Erreur : Token invalide\n\n")
+		pagedata := data.TemplateErreur(500, "APP")
+		Erreur(w, r, pagedata.Status, pagedata.Message)
+		return
+	}
+
+	track := api.GetTrack(token, trackID)
+	if track.Error.Message != "" {
+		fmt.Printf("controller - Titre - Erreur : %d %s\n\n", track.Error.Status, track.Error.Message)
+		pagedata := data.TemplateErreur(track.Error.Status, "API")
+		Erreur(w, r, pagedata.Status, pagedata.Message)
+		return
+	}
+	fmt.Printf("controller - Titre - Succès struct brut : %v\n\n", track)
+	htmldata := data.TemplateHTMLTrack(track, SessionData)
+	pagedata := structure.PageData_Titre{
+		LogIn:     SessionData.LogIn,
+		TrackData: htmldata,
+	}
+	tmpl := template.Must(template.ParseFiles("template/titre.html"))
+	tmpl.Execute(w, pagedata)
+}
+
+// Fonction pour afficher la page d'inscription
+func Inscription(w http.ResponseWriter, r *http.Request) {
+	if SessionData.LogIn {
+		// Redirige vers la page d'accueil si l'utilisateur est déjà connecté
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	var pagedata structure.PageData_Connexion_Inscription
+	if r.Method != http.MethodPost {
+		pagedata = structure.PageData_Connexion_Inscription{
+			Erreur: "",
+		}
+	} else {
+		// Récupération des données du formulaire
+		user := r.FormValue("utilisateur")
+		mdp := r.FormValue("MdP")
+		mdpConf := r.FormValue("MdPConf")
+		if mdp != mdpConf {
+			pagedata = structure.PageData_Connexion_Inscription{
+				Erreur: "Les mots de passe ne correspondent pas.",
+			}
+		} else {
+			err := data.CreationCompte(user, mdp)
+			if err != "" {
+				pagedata = structure.PageData_Connexion_Inscription{
+					Erreur: err,
+				}
+			} else {
+				fmt.Printf("controller - Inscription - Utilisateur %s inscrit avec succès\n\n", user)
+				// Redirige vers la page de connexion après une inscription réussie (code 303(requête GET))
+				http.Redirect(w, r, "/connexion", http.StatusSeeOther)
+				return
+			}
+		}
+	}
+
+	tmpl := template.Must(template.ParseFiles("template/inscription.html"))
+	tmpl.Execute(w, pagedata)
+}
+
+// Fonction pour afficher la page d'connexion
+func Connexion(w http.ResponseWriter, r *http.Request) {
+	if SessionData.LogIn {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	var pagedata structure.PageData_Connexion_Inscription
+	if r.Method != http.MethodPost {
+		pagedata = structure.PageData_Connexion_Inscription{
+			Erreur: "",
+		}
+	} else {
+		// Récupération des données du formulaire
+		user := r.FormValue("utilisateur")
+		mdp := r.FormValue("MdP")
+		err := data.ConnexionCompte(user, mdp, SessionData)
+		if err != "" {
+			pagedata = structure.PageData_Connexion_Inscription{
+				Erreur: "Erreur lors de la connexion : " + err,
+			}
+		} else {
+			fmt.Printf("controller - Connexion - Utilisateur %s connecté avec succès\n\n", user)
+			// Redirige vers la page d'accueil après une connexion réussie (code 303(requête GET))
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+
+	}
+
+	tmpl := template.Must(template.ParseFiles("template/connexion.html"))
+	tmpl.Execute(w, pagedata)
+}
+
+// Fonction pour déconnecter l'utilisateur
+func Deconnexion(w http.ResponseWriter, r *http.Request) {
+	if !SessionData.LogIn {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	if r.Method == http.MethodPost {
+		if r.FormValue("deconnexion") == "true" {
+			// Réinitialisation des données de session
+			SessionData.LogIn = false
+			SessionData.Utilisateur = structure.Utilisateur{
+				Nom: "",
+				Favoris: structure.Utilisateur_Favoris{
+					IdTitres:   []structure.Favoris_Id{},
+					IdArtistes: []structure.Favoris_Id{},
+					IdAlbums:   []structure.Favoris_Id{},
+				},
+			}
+			fmt.Printf("controller - Deconnexion - Utilisateur %s déconnecté avec succès\n\n", SessionData.Utilisateur.Nom)
+			// Redirige vers la page d'accueil après la déconnexion (code 303(requête GET))
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		} else {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		}
+	}
+	tmpl := template.Must(template.ParseFiles("template/deconnexion.html"))
+	tmpl.Execute(w, nil)
+}
+
+func Favoris(w http.ResponseWriter, r *http.Request) {
+	if !SessionData.LogIn {
+		// Redirige vers la page d'accueil si l'utilisateur n'est pas connecté
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	token := token.GetValidToken()
+	if token == "" {
+		fmt.Printf("controller - Album - Erreur : Token invalide\n\n")
+		pagedata := data.TemplateErreur(500, "APP")
+		Erreur(w, r, pagedata.Status, pagedata.Message)
+		return
+	}
+
+	pagestr := r.URL.Query().Get("page")
+	page, offset := data.GetPageOffset(pagestr)
+	fmt.Printf("controller - Album - Page : %d | Offset : %d\n\n", page, offset)
+
+	htmlData := data.TemplateHTMLFavoris(SessionData.Utilisateur, token, offset)
+	pagedata := structure.PageData_Favoris{
+		NomUtilisateur: SessionData.Utilisateur.Nom,
+		Favoris:        htmlData,
+		Pagination: structure.Pagination{
+			Page:       page,
+			ASuivant:   (len(htmlData.Titres) > 10 || len(htmlData.Artistes) >= 10 || len(htmlData.Albums) >= 10),
+			APrecedent: page > 1,
+			PageSuiv:   page + 1,
+			PagePrec:   page - 1,
+		},
+	}
+	tmpl := template.Must(template.ParseFiles("template/favoris.html"))
+	tmpl.Execute(w, pagedata)
+}
+
+// Fonction pour afficher une page d'erreur
 func Erreur(w http.ResponseWriter, r *http.Request, status int, message string) {
 	pagedata := structure.PageData_Erreur{
 		LogIn:         SessionData.LogIn,
@@ -215,6 +457,7 @@ func Erreur(w http.ResponseWriter, r *http.Request, status int, message string) 
 	tmpl.Execute(w, pagedata)
 }
 
+// Fonction de formatage et d'affichage des résultats de recherche dans la console
 func SearchFormatLog(S structure.Html_Recherche, query string) {
 	fmt.Printf("///////////////////////////////////////////\n")
 	fmt.Printf("Recherche : %s\n\n", query)
