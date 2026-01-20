@@ -91,6 +91,7 @@ h1 {
     margin-bottom: 25px;
     background: linear-gradient(90deg, #ffffff, #888888);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
