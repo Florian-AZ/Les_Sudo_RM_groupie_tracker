@@ -28,7 +28,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 func Recherche(w http.ResponseWriter, r *http.Request) {
 	/* Critère                       | GET                      | POST                              |
 	   | ----------------------------| -------------------------| ----------------------------------|
-	   | Où sont envoyées les données| Dans l’URL (`?key=value`)| Dans le corps (body) de la requête|
+	   | Où sont envoyées les données| Dans l'URL (`?key=value`)| Dans le corps (body) de la requête|
 	   | Visible dans l’URL          | ✅ Oui                  | ❌ Non                            |
 	   | Taille des données          | Limitée                  | Plus grande                       |
 	   | Sécurité                    | ❌ Moins sécurisé        | ✅ Plus adapté                   |
