@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/index.css">
+    <title>Sudo FM - A propos</title>
+</head>
+
+<body>    
+    <nav>
+        <div>
+            <div>
+                <a href="/"><img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+                <p>Sudo FM</p>
+            </div>
+            <div>
+                <a href="/">Accueil</a>
+                {{if .LogIn}}
+                <a href="/favoris">Favoris</a>
+                <a href="/deconnexion">Se déconnecter</a>
+                {{end}}
+                {{if not .LogIn}}
+                <a href="/connexion">Se connecter</a>
+                <a href="/inscription">S'inscrire</a>
+                {{end}}
+            </div>
+        </div>
+    </nav>
+
+    <div>
+        <div>
+        <h1>A propos de nous</h1>
+        <p>Sudo FM est un projet de création d'application web qui interagit avec l'API Spotify pour rechercher et afficher des informations sur les artistes, albums et les 
+            titres. Il est construit en utilisant Go pour le backend et HTML/CSS pour le frontend.
+            L'application permet aux utilisateurs de créer un compte local et de s'y connecter, de rechercher des artistes, de visualiser leurs albums et titres, et de 
+            sauvegarder leurs morceaux préférés dans une liste de favoris.
+        </div>
+        <div>
+        <h2>Maquettes</h2>
+            <p>Vous pouvez retrouver les maquettes dans le dossier "maquette" du projet.</p>
+        </div>
+        <div>
+        <h2>Tâches par ordre chronologique</h2>
+            <ul>
+                <li>Realisation des maquettes</li>
+                <li>Recherche des endpoint de l'API Spotify à utiliser</li>
+                <li>Test des endpoints via un logiciel de test d'API</li>
+                <li>Création de la fonction backend pour les token API Spotify</li>
+                <li>Création de la page d'accueil et de son backend Go</li>
+                <li>Ajout de la fonctionnalité de recherche et de sa page</li>
+                <li>Ajout de la fonctionnalité d'affichage des artistes et de sa page</li>
+                <li>Ajout de la page de gestion des erreurs API/Go avec son backend</li>
+                <li>Ajout de la fonctionnalité d'affichage des albums et de sa page</li>
+                <li>Ajout de la fonctionnalité d'affichage des titres et de sa page</li>
+                <li>Création de la fonctionnalité de connexion et d'inscription</li>
+                <li>Ajout de la fonctionnalité de gestion des favoris et de sa page</li>
+                <li>Ajout de la page a propos</li>
+            </ul>
+        </div>
+        <div>
+            <h2>Difficultés rencontrées</h2>
+            <p>Lors de la création de l'application, nous avons rencontré plusieurs défis techniques, notamment la compréhension complette de l'APi Spotify 
+                et les nuances des balises Golang dans les templates HTML. <br>
+                De plus nous avons dû comprendre comment fonctionne exactement les requêtes HTTP en Go pour pouvoir interagir efficacement avec l'API Spotify. <br>
+                La gestion de l'authentification des utilisateurs locaux et la sauvegarde de favoris avec le JSON ont également été des aspects complexes à mettre en place. <br>
+            </p>
+    </div>
+        <footer><a href="/apropos">A propos de Sudo FM</a></footer>
+</body>
+
+</html>

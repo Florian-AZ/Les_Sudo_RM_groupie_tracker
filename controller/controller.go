@@ -446,6 +446,14 @@ func Favoris(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, pagedata)
 }
 
+func APropos(w http.ResponseWriter, r *http.Request) {
+	pagedata := structure.PageData_Accueil{
+		LogIn: SessionData.LogIn,
+	}
+	tmpl := template.Must(template.ParseFiles("template/apropos.html"))
+	tmpl.Execute(w, pagedata)
+}
+
 // Fonction pour afficher une page d'erreur
 func Erreur(w http.ResponseWriter, r *http.Request, status int, message string) {
 	pagedata := structure.PageData_Erreur{
