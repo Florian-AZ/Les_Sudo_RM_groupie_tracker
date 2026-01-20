@@ -3,18 +3,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/assets/index.css">
+    <link rel="stylesheet" href="/assets/Accueil.css">
     <title>Sudo FM - Accueil</title>
 </head>
 
 <body>    
-    <nav>
-        <div>
-            <div>
-                <a href="/"><img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
-                <p>Sudo FM</p>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-container">
+                <a href="/"><img src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM" class="logo-img"></a>
+                <p class="brand-name">Sudo FM</p>
             </div>
-            <div>
+            <div class="nav-links">
                 {{if .LogIn}}
                 <a href="/favoris">Favoris</a>
                 <a href="/deconnexion">Se déconnecter</a>
@@ -27,8 +27,8 @@
         </div>
     </nav>
 
-    <div>
-        <h1>Découvrez vos sons.</h1>
+    <div class="main-content">
+        <h1>Découvrez vos sons</h1>
         <p>Bienvenue sur Sudo FM, votre plateforme de recherche musicale préférée ! 
             Plongez dans un univers sonore captivant où chaque note résonne avec passion. 
             Explorez des milliers de morceaux, artistes et sauvegardez vos musiques préférées. 
