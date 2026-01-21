@@ -128,3 +128,17 @@ a:hover {
 .button:hover {
   background-color: #45a049; 
 }
+
+.connexion_img {
+    background-image: url('/assets/img/connexion_img.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+    min-height: 83vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
