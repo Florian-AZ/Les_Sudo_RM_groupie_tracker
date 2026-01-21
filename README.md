@@ -1,6 +1,8 @@
 # TP GROUPIE-TRACKER
 
-Ce projet est une application web qui interagit avec l'API Spotify pour rechercher et afficherafficher des informations sur les artistes et les morceaux. Il est construit en utilisant Go pour le backend et HTML/CSS pour le frontend.
+Sudo FM est un projet de création d'application web qui interagit avec l'API Spotify pour rechercher et afficher des informations sur les artistes, albums et les titres. Il est construit en utilisant Go pour le backend et HTML/CSS pour le frontend. 
+
+L'application permet aux utilisateurs de créer un compte local et de s'y connecter, de rechercher des artistes, de visualiser leurs albums et titres, et de sauvegarder leurs morceaux préférés dans une liste de favoris.
 
 # Lancement de l'application
 
@@ -17,27 +19,29 @@ go run main.go
 ```
 >L'application sera accessible à l'adresse suivante : `http://localhost:8080`
 
-Un site internet sobre avec comme page:
+# Maquettes
+>Vous pouvez retrouver les maquettes dans le dossier "maquette" du projet.
+        
+# Tâches par ordre chronologique
+- Realisation des maquettes
+- Recherche des endpoint de l'API Spotify à utiliser
+- Test des endpoints via un logiciel de test d'API
+- Création de la fonction backend pour les token API Spotify
+- Création de la page d'accueil et de son backend Go
+- Ajout de la fonctionnalité de recherche et de sa page
+- Ajout de la fonctionnalité d'affichage des artistes et de sa page
+- Ajout de la page de gestion des erreurs API/Go avec son backend
+- Ajout de la fonctionnalité d'affichage des albums et de sa page
+- Ajout de la fonctionnalité d'affichage des titres et de sa page
+- Création de la fonctionnalité de connexion et d'inscription
+- Ajout de la fonctionnalité de gestion des favoris et de sa page
+- Ajout de la page a propos
 
-Accueil : Description du projet plus bouton de redirection vers la page de recherche.
+# Difficultés rencontrées
 
-Page de recherche: Barre de recherche en haut avec en dessous 6 bulles de catégorie de musique (rock, metal, pop, etc.), si recherche alors les bulles disparaissent laissant place aux résultat.
+Lors de la création de l'application, nous avons rencontré plusieurs défis techniques, notamment la compréhension complète de l'APi Spotify et les nuances des balises Golang dans les templates HTML. De plus nous avons dû comprendre comment fonctionne exactement les requêtes HTTP en Go pour pouvoir interagir efficacement avec l'API Spotify. La gestion de l'authentification des utilisateurs locaux et la sauvegarde de favoris avec le JSON ont également été des aspects complexes à mettre en place. 
 
-Page Artiste: donnée de l'artiste, album, titre populaire, related artist.
-
-Page Album: titre dans l'album
-
-Page Titre: info titre, piste de lecture
-
-Page Favoris: regroupe tout les titres favoris de l'utilisateur
-
-Page Connexion : login ou inscription
-
-Menu burger : regroupe les pages inscription + recherche + accueil + favoris
-
-
-
-# Donnée à récupérer:
+# Donnée à récupérer via l'API Spotify:
     
 - https://api.spotify.com/v1/search
     tracks
@@ -169,7 +173,11 @@ Menu burger : regroupe les pages inscription + recherche + accueil + favoris
     access_token
 
 # Auteur:
-Florian AZRIA
 
-Emrick RIVET
+* Florian AZRIA
+>Developpeur CSS/HTML
+
+* Emrick RIVET
+>Developpeur Golang/HTML
+
 
