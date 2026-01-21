@@ -28,7 +28,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 func Recherche(w http.ResponseWriter, r *http.Request) {
 	/* Critère                       | GET                      | POST                              |
 	   | ----------------------------| -------------------------| ----------------------------------|
-	   | Où sont envoyées les données| Dans l’URL (`?key=value`)| Dans le corps (body) de la requête|
+	   | Où sont envoyées les données| Dans l'URL (`?key=value`)| Dans le corps (body) de la requête|
 	   | Visible dans l’URL          | ✅ Oui                  | ❌ Non                            |
 	   | Taille des données          | Limitée                  | Plus grande                       |
 	   | Sécurité                    | ❌ Moins sécurisé        | ✅ Plus adapté                   |
@@ -443,6 +443,14 @@ func Favoris(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	tmpl := template.Must(template.ParseFiles("template/favoris.html"))
+	tmpl.Execute(w, pagedata)
+}
+
+func APropos(w http.ResponseWriter, r *http.Request) {
+	pagedata := structure.PageData_Accueil{
+		LogIn: SessionData.LogIn,
+	}
+	tmpl := template.Must(template.ParseFiles("template/apropos.html"))
 	tmpl.Execute(w, pagedata)
 }
 
