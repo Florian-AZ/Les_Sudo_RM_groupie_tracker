@@ -1,0 +1,219 @@
+/* Reset and Base Styles matching Accueil/Recherche */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+    color: #ffffff;
+    overflow-x: hidden;
+}
+
+
+.navbar {
+    width: 100%;
+    background: linear-gradient(90deg, #000000 0%, rgb(0, 146, 7) 100%);
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none;
+}
+
+.logo-img {
+    height: 60px;
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.1);
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links a {
+    color: #ccc;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #00ff00;
+}
+
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    width: 90%;
+    max-width: 1000px;
+    margin: 30px auto;
+    background-color: rgba(0, 0, 0, 0.55);
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+}
+
+
+.track-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+}
+
+.track-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+}
+
+.track-img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    border: 2px solid #333;
+}
+
+.track-info-section {
+    text-align: center;
+    width: 100%;
+}
+
+h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(90deg, #ffffff, #e0e0e0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.favoris-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #ffd700; 
+    transition: transform 0.2s;
+}
+
+.favoris-btn:hover {
+    transform: scale(1.2);
+}
+
+h4 a {
+    color: #1DB954; 
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+h4 a:hover {
+    text-decoration: underline;
+}
+
+.track-meta {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 1.1rem;
+    color: #ddd;
+}
+
+.track-meta p a {
+    color: #00ff00;
+    text-decoration: none;
+}
+
+.track-meta p a:hover {
+    text-decoration: underline;
+}
+
+
+.spotify-embed {
+    width: 100%;
+    margin-top: 30px;
+    max-width: 800px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+@media (min-width: 768px) {
+    .track-container {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+    }
+    
+    .track-header {
+        flex: 1;
+    }
+
+    .track-info-section {
+        flex: 1;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    h1 {
+        justify-content: flex-start;
+    }
+    
+    .track-meta {
+        align-items: flex-start;
+    }
+}
+
+.brand-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    margin-left: 10px;
+}
+
