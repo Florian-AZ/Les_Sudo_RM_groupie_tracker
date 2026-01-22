@@ -180,4 +180,6 @@ Lors de la création de l'application, nous avons rencontré plusieurs défis te
 * Emrick RIVET
 >Developpeur Golang/HTML
 
+https://gamma.app/docs/Groupie-Tracker-Sudo-FM-bwt9vy22q7v0572?mode=doc
+
 
