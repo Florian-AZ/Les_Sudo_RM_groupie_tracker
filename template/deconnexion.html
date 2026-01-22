@@ -3,36 +3,35 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/assets/">
+    <link rel="stylesheet" href="/assets/deconnexion.css">
     <title>Sudo FM - Deconnexion</title>
 </head>
 
 <body>    
-    <nav>
-        <div>
-            <div>
-                <a href="/"><img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-container">
+                <a href="/"><img class="logo-img" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+                <p class="brand-name">Sudo FM</p>
             </div>
-            <div>
+            <div class="nav-links">
                 <a href="/recherche">Recherche</a>
             </div>
         </div>
     </nav>
 
-    <main>
-        <div>
-            <div>
-                <h1>Êtes-vous sûr de vouloir vous déconnecter ?</h1>
-                <div>
-                    <form method="POST" action="/deconnexion">
-                        <input type="hidden" name="deconnexion" value="true">
-                        <button type="submit">Se déconnecter</button>
-                    </form>
-                    <form method="POST" action="/deconnexion">
-                        <input type="hidden" name="deconnexion" value="false">
-                        <button type="submit">Annuler</button>
-                    </form>
-                </div>
+    <main class="main-content">
+        <div class="confirmation-box">
+            <h1>Êtes-vous sûr de vouloir vous déconnecter ?</h1>
+            <div class="button-group">
+                <form method="POST" action="/deconnexion">
+                    <input type="hidden" name="deconnexion" value="true">
+                    <button type="submit" class="btn-confirm">Se déconnecter</button>
+                </form>
+                <form method="POST" action="/deconnexion">
+                    <input type="hidden" name="deconnexion" value="false">
+                    <button type="submit" class="btn-cancel">Annuler</button>
+                </form>
             </div>
         </div>        
     </main>
