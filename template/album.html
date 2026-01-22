@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/album.css">
+    <title>Sudo FM - Album</title>
+</head>
+
+<body>    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-container">
+                <a href="/"><img class="logo-img" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+                <p class="brand-name">Sudo FM</p>
+            </div>
+            <div class="nav-links">
+                <a href="/recherche">Recherche</a>
+                {{if .LogIn}}
+                <a href="/favoris">Favoris</a>
+                <a href="/deconnexion">Se déconnecter</a>
+                {{else}}
+                <a href="/connexion">Se connecter</a>
+                <a href="/inscription">S'inscrire</a>
+                {{end}}
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="album-header">
+            <img class="album-img" src="{{.AlbumTracks.Images}}" alt="Image de l'album {{.AlbumTracks.AlbumName}}">
+            
+            <div class="album-info">
+                <div class="album-title-container">
+                    <h1>{{.AlbumTracks.AlbumName}}</h1>
+                    {{if .LogIn}}
+                        {{if .AlbumTracks.IsFavoris}}
+                            <form action="" method="post" style="display:inline;">
+                                <input type="hidden" name="retirer_favoris" value="{{.AlbumTracks.AlbumID}}">
+                                <button type="submit" class="favoris-btn">★</button>
+                            </form>
+                        {{else}}
+                            <form action="" method="post" style="display:inline;">
+                                <input type="hidden" name="ajout_favoris" value="{{.AlbumTracks.AlbumID}}">
+                                <button type="submit" class="favoris-btn">☆</button>
+                            </form>
+                        {{end}}
+                    {{end}}
+                </div>
+                
+                <a class="spotify-link" href="{{.AlbumTracks.AlbumURL}}" target="_blank">Voir sur Spotify</a>
+                
+                <div class="album-meta">
+                    <p>Date de sortie : {{.AlbumTracks.Release_date}}</p>
+                    <p>Artistes : 
+                        {{range $index, $artist := .AlbumTracks.AlbumArtists}}
+                            {{if $index}}, {{end}}<a href="/artiste/{{$artist.ArtistId}}">{{$artist.ArtistName}}</a>
+                        {{end}}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <h2>Tous les titres de l'album</h2>
+        <ul class="track-list">
+            {{range .AlbumTracks.Items}}
+                <li class="track-item">
+                    <div class="track-left">
+                        <div class="track-content">
+                            <a class="track-link" href="/titre/{{.TrackId}}">{{.TrackName}}</a>
+                            <span class="track-artists">
+                                {{range $index, $artist := .Artists}}
+                                    {{if $index}}, {{end}}<a href="/artiste/{{$artist.ArtistId}}">{{$artist.ArtistName}}</a>
+                                {{end}}
+                            </span>
+                        </div>
+                    </div>
+                    <span class="track-duration">{{.DurationFormated}} min</span>
+                </li>
+            {{end}}
+        </ul>
+
+        <div class="pagination">
+            {{if .Pagination.APrecedent}}
+                <a href="?pageAlbums={{ .Pagination.PagePrec }}">Page Précédente</a>
+            {{end}}
+            
+            {{if or .Pagination.APrecedent .Pagination.ASuivant}}
+                <span>Page {{ .Pagination.Page }}</span>
+            {{end}}
+
+            {{if .Pagination.ASuivant}}
+                <a href="?pageAlbums={{ .Pagination.PageSuiv }}">Page Suivante</a>
+            {{end}}
+        </div>
+    </main>
+</body>
+
+</html>
