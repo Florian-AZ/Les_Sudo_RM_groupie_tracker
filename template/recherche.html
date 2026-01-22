@@ -3,17 +3,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/assets/">
+    <link rel="stylesheet" href="/assets/Recherche.css">
     <title>Sudo FM - Recherche</title>
 </head>
 
 <body>    
-    <nav>
-        <div>
-            <div>
-                <img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM">
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-container">
+                <a href="/"><img src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM" class="logo-img"></a>
+                <p class="brand-name">Sudo FM</p>
             </div>
-            <div>
+            <div class="nav-links">
                 <a href="/">Accueil</a>
                 {{if .LogIn}}
                 <a href="/favoris">Favoris</a>
@@ -26,101 +27,111 @@
         </div>
     </nav>
 
-    <main>
-        <div>
-            <form method="GET" action="/recherche">
+    <div class="main-content">
+        <div class="search-container">
+            <form method="GET" action="/recherche" class="search-form">
                 <input type="text" name="search" placeholder="Rechercher un artiste, un album ou un titre" value="{{.SearchQuery}}">
                 <button type="submit">Rechercher</button>
             </form>
         </div>
-        {{if .SearchQuery}}
-            <div>
-                <a href="/recherche?search=genre:(rock)">Rock</a>
-                <a href="/recherche?search=genre:(pop)">Pop</a>
-                <a href="/recherche?search=genre:(hip-hop)">Hip-Hop</a>
-                <a href="/recherche?search=genre:(jazz)">Jazz</a>
-                <a href="/recherche?search=genre:(classical)">Classique</a>
-                <a href="/recherche?search=genre:(electronic)">Électronique</a>
-            </div>
+        
+        <div class="genre-section">
+            {{if .SearchQuery}}
+                <div class="genre-tags">
+                    <a href="/recherche?search=genre:(rock)" class="genre-tag">Rock</a>
+                    <a href="/recherche?search=genre:(pop)" class="genre-tag">Pop</a>
+                    <a href="/recherche?search=genre:(hip-hop)" class="genre-tag">Hip-Hop</a>
+                    <a href="/recherche?search=genre:(jazz)" class="genre-tag">Jazz</a>
+                    <a href="/recherche?search=genre:(classical)" class="genre-tag">Classique</a>
+                    <a href="/recherche?search=genre:(electronic)" class="genre-tag">Électronique</a>
+                </div>
             {{else}}
-            <h2>Une recherche par Genre ?</h2>
-            <div>
-                <a href="/recherche?search=genre:(rock)">//Rock//</a>
-                <a href="/recherche?search=genre:(pop)">//Pop//</a>
-                <a href="/recherche?search=genre:(hip-hop)">//Hip-Hop//</a>
-                <a href="/recherche?search=genre:(jazz)">//Jazz//</a>
-                <a href="/recherche?search=genre:(classical)">//Classique//</a>
-                <a href="/recherche?search=genre:(electronic)">//Électronique//</a>
-            </div>
-        {{end}}
+                <h2>Une recherche par Genre ?</h2>
+                <div class="genre-tags">
+                    <a href="/recherche?search=genre:(rock)" class="genre-tag">//Rock//</a>
+                    <a href="/recherche?search=genre:(pop)" class="genre-tag">//Pop//</a>
+                    <a href="/recherche?search=genre:(hip-hop)" class="genre-tag">//Hip-Hop//</a>
+                    <a href="/recherche?search=genre:(jazz)" class="genre-tag">//Jazz//</a>
+                    <a href="/recherche?search=genre:(classical)" class="genre-tag">//Classique//</a>
+                    <a href="/recherche?search=genre:(electronic)" class="genre-tag">//Électronique//</a>
+                </div>
+            {{end}}
+        </div>
+
         {{if .SearchQuery}}
-            <h2>Résultats :</h2>
+            <h2 class="results-title">Résultats :</h2>
+            <div class="results-container">
             {{if .SearchData.TrackData}}
-                <div>
-                    <h3>Titres :</h3>
-                    <ul>
+                <div class="results-section">
+                    <h3>Titres</h3>
+                    <div class="cards-grid">
                         {{range $s, $i := .SearchData.TrackData}}
-                            <li>
-                                <a href="/titre/{{$i.TrackId}}">
-                                    {{$i.TrackName}} {{if $i.Artists}}par {{(index $i.Artists 0).ArtistName}}{{else}}Artiste inconnu{{end}}
+                            <div class="card">
+                                <a href="/titre/{{$i.TrackId}}" class="card-link">
+                                    <span class="card-title">{{$i.TrackName}}</span>
+                                    <span class="card-subtitle">{{if $i.Artists}}par {{(index $i.Artists 0).ArtistName}}{{else}}Artiste inconnu{{end}}</span>
                                 </a>
                                 {{if $.LogIn}}
                                     {{if $i.IsFavoris}}
-                                        <span>★</span>
+                                        <span class="fav-star">★</span>
                                     {{else}}
-                                        <span>☆</span>
+                                        <span class="fav-star-empty">☆</span>
                                     {{end}}
                                 {{end}}
-                            </li>
+                            </div>
                         {{end}}
-                    </ul>
+                    </div>
                 </div>
             {{end}}
 
             {{if .SearchData.ArtistData}}
-                <div>
-                    <h3>Artistes :</h3>
-                    <ul>
+                <div class="results-section">
+                    <h3>Artistes</h3>
+                    <div class="cards-grid">
                         {{range .SearchData.ArtistData}}
-                            <li>
-                                <a href="/artiste/{{.ArtistId}}">
-                                    {{.ArtistName}} 
+                            <div class="card">
+                                <a href="/artiste/{{.ArtistId}}" class="card-link">
+                                    <span class="card-title">{{.ArtistName}}</span>
                                 </a>
                                 {{if $.LogIn}}
                                     {{if .IsFavoris}}
-                                        <span>★</span>
+                                        <span class="fav-star">★</span>
                                     {{else}}
-                                        <span>☆</span>
+                                        <span class="fav-star-empty">☆</span>
                                     {{end}}
                                 {{end}}
-                            </li>
+                            </div>
                         {{end}}
-                    </ul>
+                    </div>
                 </div>
             {{end}}
 
             {{if .SearchData.AlbumData}}
-                <div>
-                    <h3>Albums :</h3>
-                    <ul>
+                <div class="results-section">
+                    <h3>Albums</h3>
+                    <div class="cards-grid">
                         {{range .SearchData.AlbumData}}
-                            <li>
-                                <a href="/album/{{.AlbumId}}">
-                                    {{.AlbumName}} - {{if .ReleaseDate}}{{.ReleaseDate}}{{end}}{{if .Artists}} - {{(index .Artists 0).ArtistName}}{{else}}Artiste inconnu{{end}}
+                            <div class="card">
+                                <a href="/album/{{.AlbumId}}" class="card-link">
+                                    <span class="card-title">{{.AlbumName}}</span> 
+                                    <span class="card-subtitle">{{if .ReleaseDate}}{{.ReleaseDate}}{{end}}</span>
+                                    <span class="card-subtitle">{{if .Artists}} - {{(index .Artists 0).ArtistName}}{{else}}Artiste inconnu{{end}}</span>
                                 </a>
                                 {{if $.LogIn}}
                                     {{if .IsFavoris}}
-                                        <span>★</span>
+                                        <span class="fav-star">★</span>
                                     {{else}}
-                                        <span>☆</span>
+                                        <span class="fav-star-empty">☆</span>
                                     {{end}}
                                 {{end}}
-                            </li>
+                            </div>
                         {{end}}
-                    </ul>
+                    </div>
                 </div>
             {{end}}
-            <div>
+            </div>
+            
+            <div class="pagination">
                 {{if .Pagination.APrecedent}}
                     <a href="/recherche?search={{.SearchQuery}}&page={{.Pagination.PagePrec}}"><- Page précédente</a>
                 {{end}}
@@ -134,7 +145,7 @@
                 {{end}}
             </div>
         {{end}}
-    </main>
+    </div>
 </body>
 
 </html>
