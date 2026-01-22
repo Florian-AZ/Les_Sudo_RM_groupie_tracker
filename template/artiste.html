@@ -3,18 +3,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/assets/">
+    <link rel="stylesheet" href="/assets/artiste.css">
     <title>Sudo FM - Artiste</title>
 </head>
 
 <body>    
-    <nav>
-        <div>
-            <div>
-                <img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM">
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-container">
+                <a href="/"><img class="logo-img" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+                <p class="brand-name">Sudo FM</p>
             </div>
-            <div>
-                <a href="/">Accueil</a>
+            <div class="nav-links">
                 <a href="/recherche">Recherche</a>
                 {{if .LogIn}}
                 <a href="/favoris">Favoris</a>
@@ -27,84 +27,94 @@
         </div>
     </nav>
 
-    <main>
-        <h1>Artiste :</h1>
+    <main class="main-content">
         <!-- Contenu de la page artiste -->
-        <div>
-            <img src="{{.ArtistData.Artist.Images}}" alt="Image de l'artiste {{.ArtistData.Artist.ArtistName}}">
-            <h1>{{.ArtistData.Artist.ArtistName}}
-                {{if .LogIn}}
-                    {{if .ArtistData.Artist.IsFavoris}}
-                        <span><form action="" method="post">
-                            <input type="hidden" name="retirer_favoris" value="{{.ArtistData.Artist.ArtistId}}">
-                            <button type="submit" style="background:none; border:none; padding:0; cursor:pointer; font-size:1em;">★</button>
-                        </form></span>
-                    {{else}}
-                        <span>
-                            <span><form action="" method="post">
-                            <input type="hidden" name="ajout_favoris" value="{{.ArtistData.Artist.ArtistId}}">
-                            <button type="submit" style="background:none; border:none; padding:0; cursor:pointer; font-size:1em;">☆</button>
-                        </form></span>
+        <div class="artist-header">
+            <img class="artist-img" src="{{.ArtistData.Artist.Images}}" alt="Image de l'artiste {{.ArtistData.Artist.ArtistName}}">
+            
+            <div class="artist-info">
+                <div class="artist-name-container">
+                    <h1>{{.ArtistData.Artist.ArtistName}}</h1>
+                    {{if .LogIn}}
+                        {{if .ArtistData.Artist.IsFavoris}}
+                            <form action="" method="post" style="display:inline;">
+                                <input type="hidden" name="retirer_favoris" value="{{.ArtistData.Artist.ArtistId}}">
+                                <button type="submit" class="favoris-btn">★</button>
+                            </form>
+                        {{else}}
+                            <form action="" method="post" style="display:inline;">
+                                <input type="hidden" name="ajout_favoris" value="{{.ArtistData.Artist.ArtistId}}">
+                                <button type="submit" class="favoris-btn">☆</button>
+                            </form>
+                        {{end}}
                     {{end}}
-                {{end}}
-            </h1>
-            <h4><a href="{{.ArtistData.Artist.ArtistURL}}" target="_blank">Liens vers Spotify</a></h4>
-            <div>
-                <p>Followers : {{.ArtistData.Artist.NbFollowers}}</p>
-                <p>Genres : 
-                    {{range $i, $g := .ArtistData.Artist.Genres}}
-                        <!-- Si $i = 0 la condition est false, si > 0 lacondition est true donc on met une virgule -->
-                        {{if $i}}, {{end}}{{$g}}
-                    {{end}}
-                </p>
-            </div>
-            <!-- Affichage des Top Tracks -->
-            {{if .ArtistData.TopTracks}}
-                <h2>Top Titres</h2>
-                    {{if .ErrTotalTracks.Status}}
-                        <div>
-                            <h2>Erreur {{.ErrTotalTracks.Status}} lors du chargement des Top Titres : {{.ErrTotalTracks.Message}}</h2>
-                        </div>
-                    {{else}}
-                        <ul>
-                            {{range $i, $tt := .ArtistData.TopTracks}}
-                            <li>
-                                <img width="100" src="{{$tt.Images}}" alt="Image du titre {{$tt.TrackName}}">
-                                <a href="/titre/{{$tt.TrackId}}">{{$tt.TrackName}}</a>
-                            </li>
-                            {{end}}
-                        </ul> 
-                    {{end}}
-            {{end}}
-            <!-- Affichage des Albums -->
-            <h2>Albums</h2>
-            {{if .ErrAlbums.Status}}
-                <div>
-                    <h2>Erreur {{.ErrAlbums.Status}} lors du chargement des Albums : {{.ErrAlbums.Message}}</h2>
                 </div>
-            {{end}}
-            <ul>
-            {{range $i, $a := .ArtistData.Albums}}
-                <li>
-                    <img width="100" src="{{$a.Images}}" alt="Image de l'album {{$a.AlbumName}}">
-                    <a href="/album/{{$a.AlbumId}}">{{$a.AlbumName}}</a>
-                </li>
-            {{end}}
-            </ul>
-            <!-- Pagination des Albums -->
-            <div>
-                {{if .PaginationAlbums.APrecedent}}
-                    <a href="?pageAlbums={{ .PaginationAlbums.PagePrec}}">Page Précédente</a>
-                {{end}}
-                {{if .PaginationAlbums.APrecedent}}
-                    <span>Page {{ .PaginationAlbums.Page }}</span>
-                {{else if .PaginationAlbums.ASuivant}}
-                    <span>Page {{ .PaginationAlbums.Page }}</span>
-                {{end}}
-                {{if .PaginationAlbums.ASuivant}}
-                    <a href="?pageAlbums={{ .PaginationAlbums.PageSuiv}}">Page Suivante</a>
-                {{end}}
+                
+                <a class="spotify-link" href="{{.ArtistData.Artist.ArtistURL}}" target="_blank">Voir sur Spotify</a>
+                
+                <div class="stats">
+                    <span class="stat-item">Followers : {{.ArtistData.Artist.NbFollowers}}</span>
+                    <span class="stat-item">Genres : 
+                        {{range $i, $g := .ArtistData.Artist.Genres}}
+                            {{if $i}}, {{end}}{{$g}}
+                        {{end}}
+                    </span>
+                </div>
             </div>
+        </div>
+
+        <!-- Affichage des Top Tracks -->
+        {{if .ArtistData.TopTracks}}
+            <h2>Top Titres</h2>
+                {{if .ErrTotalTracks.Status}}
+                    <div>
+                        <h2 style="color:red; font-size:1.2rem;">Erreur {{.ErrTotalTracks.Status}} lors du chargement des Top Titres : {{.ErrTotalTracks.Message}}</h2>
+                    </div>
+                {{else}}
+                    <ul class="tracks-list">
+                        {{range $i, $tt := .ArtistData.TopTracks}}
+                        <li class="track-item">
+                            <img src="{{$tt.Images}}" alt="Image du titre {{$tt.TrackName}}">
+                            <a href="/titre/{{$tt.TrackId}}">{{$tt.TrackName}}</a>
+                        </li>
+                        {{end}}
+                    </ul> 
+                {{end}}
+        {{end}}
+
+        <!-- Affichage des Albums -->
+        <h2>Albums</h2>
+        {{if .ErrAlbums.Status}}
+            <div>
+                <h2 style="color:red; font-size:1.2rem;">Erreur {{.ErrAlbums.Status}} lors du chargement des Albums : {{.ErrAlbums.Message}}</h2>
+            </div>
+        {{end}}
+        
+        <div class="grid-container">
+            {{range $i, $a := .ArtistData.Albums}}
+                <!-- Using div instead of li/ul for grid container logic -->
+                <a href="/album/{{$a.AlbumId}}" class="card">
+                    <img class="card-img" src="{{$a.Images}}" alt="Image de l'album {{$a.AlbumName}}">
+                    <div class="card-content">
+                        <span class="card-title">{{$a.AlbumName}}</span>
+                    </div>
+                </a>
+            {{end}}
+        </div>
+
+        <!-- Pagination des Albums -->
+        <div class="pagination">
+            {{if .PaginationAlbums.APrecedent}}
+                <a href="?pageAlbums={{ .PaginationAlbums.PagePrec}}">Page Précédente</a>
+            {{end}}
+            
+            {{if or .PaginationAlbums.APrecedent .PaginationAlbums.ASuivant}}
+                <span>Page {{ .PaginationAlbums.Page }}</span>
+            {{end}}
+
+            {{if .PaginationAlbums.ASuivant}}
+                <a href="?pageAlbums={{ .PaginationAlbums.PageSuiv}}">Page Suivante</a>
+            {{end}}
         </div>
     </main>
 </body>
