@@ -1,0 +1,308 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+    color: #ffffff;
+    overflow-x: hidden;
+}
+
+
+.navbar {
+    width: 100%;
+    background: linear-gradient(90deg, #000000 0%, rgb(0, 146, 7) 100%);
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none;
+}
+
+.logo-img {
+    height: 60px;
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.1);
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links a {
+    color: #ccc;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #00ff00;
+}
+
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    width: 90%;
+    max-width: 1200px;
+    margin: 30px auto;
+    background-color: rgba(0, 0, 0, 0.55);
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+}
+
+h1, h2, h3 {
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(90deg, #ffffff, #e0e0e0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+h2 {
+    font-size: 2rem;
+    border-bottom: 2px solid #009207;
+    padding-bottom: 10px;
+    margin-top: 40px;
+    width: 100%;
+}
+
+
+.album-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+    margin-bottom: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 30px;
+    border-radius: 20px;
+}
+
+.album-img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    border: 2px solid #333;
+}
+
+.album-info {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    justify-content: center;
+}
+
+.album-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.favoris-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 2rem;
+    color: #ffd700;
+    transition: transform 0.2s;
+}
+
+.favoris-btn:hover {
+    transform: scale(1.2);
+}
+
+.spotify-link {
+    color: #1DB954;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.spotify-link:hover {
+    text-decoration: underline;
+}
+
+.album-meta {
+    font-size: 1.1rem;
+    color: #ddd;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.album-meta a {
+    color: #00ff00;
+    text-decoration: none;
+}
+
+.album-meta a:hover {
+    text-decoration: underline;
+}
+
+
+.track-list {
+    width: 100%;
+    list-style: none;
+}
+
+.track-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background: rgba(255,255,255,0.05);
+    margin-bottom: 1px;
+    transition: background 0.2s;
+}
+
+.track-item:first-child {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.track-item:last-child {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.track-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.track-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.track-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.track-link {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.track-link:hover {
+    color: #00ff00;
+}
+
+.track-artists {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.track-artists a {
+    color: #ccc;
+    text-decoration: none;
+}
+
+.track-artists a:hover {
+    text-decoration: underline;
+}
+
+.track-duration {
+    color: #aaa;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    margin-left: 20px;
+}
+
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 40px;
+    padding-top: 20px;
+    width: 100%;
+}
+
+.pagination a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 20px;
+    background: rgba(0, 146, 7, 0.3);
+    border-radius: 20px;
+    transition: background 0.3s;
+}
+
+.pagination a:hover {
+    background: rgba(0, 146, 7, 0.6);
+}
+
+.pagination span {
+    color: #aaa;
+    font-weight: bold;
+}
+
+@media (min-width: 768px) {
+    .album-header {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    
+    .album-info {
+        align-items: flex-start;
+        text-align: left;
+    }
+    
+    .album-title-container {
+        justify-content: flex-start;
+    }
+}
