@@ -6,69 +6,216 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
-	"strings"
+	"strconv"
 	"time"
 )
 
-func GetToken() structure.Token {
-
+func SearchBar(token string, quary string, offset int) structure.Api_Recherche {
 	// URL de L'API
-	urlApi := "https://accounts.spotify.com/api/token"
+	urlApi := "https://api.spotify.com/v1/search"
 
 	// Initialisation du client HTTP qui va émettre/demander les requêtes
 	httpClient := http.Client{
 		Timeout: time.Second * 2, // Timeout apres 2sec
 	}
 
-	//Paramètres de type body à inserer à la req POST
-	data := url.Values{}
-	data.Set("grant_type", "client_credentials") //Name, Value
-	data.Set("client_id", "967f549670ed4aefbfedf2b746202c75")
-	data.Set("client_secret", "ad8b9b61687d4c3387784e0a7e34c54e")
-
 	// Création de la requête HTTP vers L'API avec initialisation de la methode HTTP, la route et le corps de la requête
-	req, errReq := http.NewRequest(http.MethodPost, urlApi, strings.NewReader(data.Encode())) // Méthode de req, url de l'API, Paramètres de la req (On converti les strings en flux lisible io.reader)
+	req, errReq := http.NewRequest(http.MethodGet, urlApi, nil)
 	if errReq != nil {
-		fmt.Println("Oupss, une erreur est survenue : ", errReq.Error())
+		fmt.Printf("api.SearchBar - Erreur - NewRequest : %s\n\n", errReq.Error())
 	}
 
 	// Ajout d'une métadonnée dans le header
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Authorization", "Bearer "+token)
+
+	//Paramètre de type query à inserer à la req GET
+	q := req.URL.Query()
+	q.Add("q", quary)
+	q.Add("type", "artist,track,album")
+	q.Add("limit", "10")
+	q.Add("offset", strconv.Itoa(offset))
+	req.URL.RawQuery = q.Encode()
 
 	// Execution de la requête HTTP vars L'API
 	res, errResp := httpClient.Do(req)
 	if errResp != nil {
-		fmt.Println("Oupss, une erreur est survenue : ", errResp.Error())
-		return structure.Token{Error: errResp.Error()}
+		// Si une erreur est survenue lors de l'appel à l'API
+		fmt.Printf("api.SearchBar - Erreur - Do : %s\n\n", errResp.Error())
+		return structure.Api_Recherche{
+			Error: structure.Api_Error{
+				Status:  504,
+				Message: errResp.Error()}}
 	}
 
-	if res.Body != nil {
-		defer res.Body.Close()
+	// Assurer la fermeture du corps de la réponse HTTP une fois la fonction terminée
+	defer res.Body.Close()
+
+	// Si le statut de la réponse HTTP n'est pas 200 OK (c'est à dire une erreur)
+	if res.StatusCode != http.StatusOK {
+		return structure.Api_Recherche{
+			Error: structure.Api_Error{
+				Status:  res.StatusCode,
+				Message: http.StatusText(res.StatusCode),
+			},
+		}
 	}
 
 	// Lecture et récupération du corps de la requête HTTP
 	body, errBody := io.ReadAll(res.Body)
 	if errBody != nil {
-		fmt.Println("Oupss, une erreur est survenue : ", errBody.Error())
+		fmt.Printf("api.SearchBar - Erreur - ReadAll : %s\n\n", errBody.Error())
+		return structure.Api_Recherche{
+			Error: structure.Api_Error{
+				Status:  500,
+				Message: errBody.Error(),
+			}}
 	}
 
 	// Déclaration de la variable qui va contenir les données
-	var decodeData structure.Token
+	var decodeData structure.Api_Recherche
 
 	// Decodage des données en format JSON et ajout des donnée à la variable: decodeData
 	json.Unmarshal(body, &decodeData)
 
 	// Affichage des données
-	if decodeData.Error != "" {
+	if decodeData.Error.Message != "" {
+		fmt.Printf("api.SearchBar - Erreur - %s\n\n", decodeData.Error.Message)
 		return decodeData
 	} else {
-		fmt.Println("Token récupéré avec succès : ", decodeData.AccessToken)
+		fmt.Printf("api.SearchBar - Succès -  brut: %v\n\n", decodeData)
 		return decodeData
 	}
 }
 
-func GetAlbum(Token string, id string) structure.AllAlbums {
+func GetArtistData(Token string, id string, offset int) structure.Api_Artist {
+	// URL de L'API
+	urlApi := "https://api.spotify.com/v1/artists/" + id
+
+	// Initialisation du client HTTP qui va émettre/demander les requêtes
+	httpClient := http.Client{
+		Timeout: time.Second * 2, // Timeout apres 2sec
+	}
+
+	// Création de la requête HTTP vers L'API avec initialisation de la methode HTTP, la route et le corps de la requête
+	req, errReq := http.NewRequest(http.MethodGet, urlApi, nil)
+	if errReq != nil {
+		fmt.Printf("api.GetArtistData - Erreur - NewRequest : %s\n\n", errReq.Error())
+	}
+
+	//Paramètre de type query à inserer à la req GET
+	q := req.URL.Query()
+	q.Add("limit", "10")
+	q.Add("offset", strconv.Itoa(offset))
+	req.URL.RawQuery = q.Encode()
+
+	// Ajout d'une métadonnée dans le header
+	req.Header.Add("Authorization", "Bearer "+Token)
+
+	// Execution de la requête HTTP vars L'API
+	res, errResp := httpClient.Do(req)
+	if errResp != nil {
+		fmt.Printf("api.GetArtistData - Erreur - Do : %s\n\n", errResp.Error())
+		return structure.Api_Artist{
+			Error: structure.Api_Error{
+				Status:  504,
+				Message: errResp.Error()}}
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return structure.Api_Artist{
+			Error: structure.Api_Error{
+				Status:  res.StatusCode,
+				Message: http.StatusText(res.StatusCode),
+			},
+		}
+	}
+
+	// Lecture et récupération du corps de la requête HTTP
+	body, errBody := io.ReadAll(res.Body)
+	if errBody != nil {
+		fmt.Printf("api.GetArtistData - Erreur - ReadAll : %s\n\n", errBody.Error())
+	}
+
+	// Déclaration de la variable qui va contenir les données
+	var decodeData structure.Api_Artist
+
+	// Decodage des données en format JSON et ajout des donnée à la variable: decodeData
+	json.Unmarshal(body, &decodeData)
+
+	// Affichage des données
+	if decodeData.Error.Message != "" {
+		return decodeData
+	} else {
+		fmt.Printf("api.GetArtistData - Succès - artiste %s récupéré : \n\n", id)
+		fmt.Printf("api.GetArtistData - Succès - artiste brut: %v\n\n", decodeData)
+		return decodeData
+	}
+}
+
+func GetArtistTopTracks(Token string, id string) structure.Api_TopTracks {
+	// URL de L'API
+	urlApi := fmt.Sprintf("https://api.spotify.com/v1/artists/%s/top-tracks", id)
+
+	// Initialisation du client HTTP qui va émettre/demander les requêtes
+	httpClient := http.Client{
+		Timeout: time.Second * 2, // Timeout apres 2sec
+	}
+
+	// Création de la requête HTTP vers L'API avec initialisation de la methode HTTP, la route et le corps de la requête
+	req, errReq := http.NewRequest(http.MethodGet, urlApi, nil)
+	if errReq != nil {
+		fmt.Printf("api.GetArtistTopTracks - Erreur - NewRequest : %s\n\n", errReq.Error())
+	}
+
+	// Ajout d'une métadonnée dans le header
+	req.Header.Add("Authorization", "Bearer "+Token)
+
+	// Execution de la requête HTTP vars L'API
+	res, errResp := httpClient.Do(req)
+	if errResp != nil {
+		fmt.Printf("api.GetArtistTopTracks - Erreur - Do : %s\n\n", errResp.Error())
+		return structure.Api_TopTracks{
+			Error: structure.Api_Error{
+				Status:  504,
+				Message: errResp.Error()}}
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return structure.Api_TopTracks{
+			Error: structure.Api_Error{
+				Status:  res.StatusCode,
+				Message: http.StatusText(res.StatusCode),
+			},
+		}
+	}
+
+	// Lecture et récupération du corps de la requête HTTP
+	body, errBody := io.ReadAll(res.Body)
+	if errBody != nil {
+		fmt.Printf("api.GetArtistTopTracks - Erreur - ReadAll : %s\n\n", errBody.Error())
+	}
+
+	// Déclaration de la variable qui va contenir les données
+	var decodeData structure.Api_TopTracks
+
+	// Decodage des données en format JSON et ajout des donnée à la variable: decodeData
+	json.Unmarshal(body, &decodeData)
+
+	// Affichage des données
+	if decodeData.Error.Message != "" {
+		return decodeData
+	} else {
+		fmt.Printf("api.GetArtistTopTracks - Succès - album de %s récupéré : \n\n", id)
+		fmt.Printf("api.GetArtistTopTracks - Succès - album brut: %v\n\n", decodeData)
+		return decodeData
+	}
+}
+
+func GetArtistAlbums(Token string, id string, offset int) structure.Api_ArtistAlbums {
 	// URL de L'API
 	urlApi := fmt.Sprintf("https://api.spotify.com/v1/artists/%s/albums", id)
 
@@ -80,12 +227,13 @@ func GetAlbum(Token string, id string) structure.AllAlbums {
 	// Création de la requête HTTP vers L'API avec initialisation de la methode HTTP, la route et le corps de la requête
 	req, errReq := http.NewRequest(http.MethodGet, urlApi, nil)
 	if errReq != nil {
-		fmt.Println("Oupss, une erreur est survenue : ", errReq.Error())
+		fmt.Printf("api.GetArtistAlbums - Erreur - NewRequest : %s\n\n", errReq.Error())
 	}
 
 	//Paramètre de type query à inserer à la req GET
 	q := req.URL.Query()
-	q.Add("include_groups", "album")
+	q.Add("limit", "10")
+	q.Add("offset", strconv.Itoa(offset))
 	req.URL.RawQuery = q.Encode()
 
 	// Ajout d'une métadonnée dans le header
@@ -94,37 +242,113 @@ func GetAlbum(Token string, id string) structure.AllAlbums {
 	// Execution de la requête HTTP vars L'API
 	res, errResp := httpClient.Do(req)
 	if errResp != nil {
-		fmt.Println("Oupss, une erreur est survenue : ", errResp.Error())
-		return structure.AllAlbums{Error: errResp.Error()}
+		fmt.Printf("api.GetArtistAlbums - Erreur - Do : %s\n\n", errResp.Error())
+		return structure.Api_ArtistAlbums{
+			Error: structure.Api_Error{
+				Status:  504,
+				Message: errResp.Error()}}
 	}
 
-	if res.Body != nil {
-		defer res.Body.Close()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return structure.Api_ArtistAlbums{
+			Error: structure.Api_Error{
+				Status:  res.StatusCode,
+				Message: http.StatusText(res.StatusCode),
+			},
+		}
 	}
 
 	// Lecture et récupération du corps de la requête HTTP
 	body, errBody := io.ReadAll(res.Body)
 	if errBody != nil {
-		fmt.Println("Oupss, une erreur est survenue : ", errBody.Error())
+		fmt.Printf("api.GetArtistAlbums - Erreur - ReadAll : %s\n\n", errBody.Error())
 	}
 
 	// Déclaration de la variable qui va contenir les données
-	var decodeData structure.AllAlbums
+	var decodeData structure.Api_ArtistAlbums
 
 	// Decodage des données en format JSON et ajout des donnée à la variable: decodeData
 	json.Unmarshal(body, &decodeData)
 
 	// Affichage des données
-	if decodeData.Error != "" {
+	if decodeData.Error.Message != "" {
 		return decodeData
 	} else {
-		fmt.Printf("album de %s récupéré : \n", id)
-		println(decodeData.AlbumItems)
+		fmt.Printf("api.GetArtistAlbums - Succès - album de %s récupéré : \n\n", id)
+		fmt.Printf("api.GetArtistAlbums - Succès - album brut: %v\n\n", decodeData)
 		return decodeData
 	}
 }
 
-func GetTrack(Token string, id string) structure.Track {
+func GetAlbum(Token string, id string, offset int) structure.Api_AlbumsTracks {
+	// URL de L'API
+	urlApi := fmt.Sprintf("https://api.spotify.com/v1/albums/%s", id)
+
+	// Initialisation du client HTTP qui va émettre/demander les requêtes
+	httpClient := http.Client{
+		Timeout: time.Second * 2, // Timeout apres 2sec
+	}
+
+	// Création de la requête HTTP vers L'API avec initialisation de la methode HTTP, la route et le corps de la requête
+	req, errReq := http.NewRequest(http.MethodGet, urlApi, nil)
+	if errReq != nil {
+		fmt.Printf("api.GetAlbum - Erreur - NewRequest : %s\n\n", errReq.Error())
+	}
+
+	//Paramètre de type query à inserer à la req GET
+	q := req.URL.Query()
+	q.Add("limit", "10")
+	q.Add("offset", strconv.Itoa(offset))
+	req.URL.RawQuery = q.Encode()
+
+	// Ajout d'une métadonnée dans le header
+	req.Header.Add("Authorization", "Bearer "+Token)
+
+	// Execution de la requête HTTP vars L'API
+	res, errResp := httpClient.Do(req)
+	if errResp != nil {
+		fmt.Printf("api.GetAlbum - Erreur - Do : %s\n\n", errResp.Error())
+		return structure.Api_AlbumsTracks{
+			Error: structure.Api_Error{
+				Status:  504,
+				Message: errResp.Error()}}
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return structure.Api_AlbumsTracks{
+			Error: structure.Api_Error{
+				Status:  res.StatusCode,
+				Message: http.StatusText(res.StatusCode),
+			},
+		}
+	}
+
+	// Lecture et récupération du corps de la requête HTTP
+	body, errBody := io.ReadAll(res.Body)
+	if errBody != nil {
+		fmt.Printf("api.GetAlbum - Erreur - ReadAll : %s\n\n", errBody.Error())
+	}
+
+	// Déclaration de la variable qui va contenir les données
+	var decodeData structure.Api_AlbumsTracks
+	// Decodage des données en format JSON et ajout des donnée à la variable: decodeData
+	json.Unmarshal(body, &decodeData)
+
+	// Affichage des données
+	if decodeData.Error.Message != "" {
+		return decodeData
+	} else {
+		fmt.Printf("api.GetAlbum - Succès - album de %s récupéré : \n\n", id)
+		fmt.Printf("api.GetAlbum - Succès - album brut: %v\n\n", decodeData)
+		return decodeData
+	}
+}
+
+func GetTrack(token string, id string) structure.Api_Track {
 	// URL de L'API
 	urlApi := "https://api.spotify.com/v1/tracks/" + id
 
@@ -136,41 +360,124 @@ func GetTrack(Token string, id string) structure.Track {
 	// Création de la requête HTTP vers L'API avec initialisation de la methode HTTP, la route et le corps de la requête
 	req, errReq := http.NewRequest(http.MethodGet, urlApi, nil)
 	if errReq != nil {
-		fmt.Println("Oupss, une erreur est survenue : ", errReq.Error())
+		fmt.Printf("api.GetTrack - Erreur - NewRequest : %s\n\n", errReq.Error())
 	}
 
 	// Ajout d'une métadonnée dans le header
-	req.Header.Add("Authorization", "Bearer "+Token)
+	req.Header.Add("Authorization", "Bearer "+token)
 
 	// Execution de la requête HTTP vars L'API
 	res, errResp := httpClient.Do(req)
 	if errResp != nil {
-		fmt.Println("Oupss, une erreur est survenue : ", errResp.Error())
-		return structure.Track{Error: structure.Error{Message: errResp.Error()}}
+		// Si une erreur est survenue lors de l'appel à l'API
+		fmt.Printf("api.GetTrack - Erreur - Do : %s\n\n", errResp.Error())
+		return structure.Api_Track{
+			Error: structure.Api_Error{
+				Status:  504,
+				Message: errResp.Error()}}
 	}
 
-	if res.Body != nil {
-		defer res.Body.Close()
+	// Assurer la fermeture du corps de la réponse HTTP une fois la fonction terminée
+	defer res.Body.Close()
+
+	// Si le statut de la réponse HTTP n'est pas 200 OK (c'est à dire une erreur)
+	if res.StatusCode != http.StatusOK {
+		return structure.Api_Track{
+			Error: structure.Api_Error{
+				Status:  res.StatusCode,
+				Message: http.StatusText(res.StatusCode),
+			},
+		}
 	}
 
 	// Lecture et récupération du corps de la requête HTTP
 	body, errBody := io.ReadAll(res.Body)
 	if errBody != nil {
-		fmt.Println("Oupss, une erreur est survenue : ", errBody.Error())
+		fmt.Printf("api.GetTrack - Erreur - ReadAll : %s\n\n", errBody.Error())
 	}
 
 	// Déclaration de la variable qui va contenir les données
-	var decodeData structure.Track
+	var decodeData structure.Api_Track
+	// Decodage des données en format JSON et ajout des donnée à la variable: decodeData
+	json.Unmarshal(body, &decodeData)
+
+	// Affichage des données
+	if decodeData.Error.Message != "" {
+		fmt.Printf("api.GetTrack - Erreur - %s\n\n", decodeData.Error.Message)
+		return decodeData
+	} else {
+		fmt.Printf("api.GetTrack - Succès -  brut: %v\n\n", decodeData)
+		return decodeData
+	}
+}
+
+/*
+func ExempleApi(token string) structure.Exemple {
+	// URL de L'API
+	urlApi := "https://api.spotify.com/v1/"
+
+	// Initialisation du client HTTP qui va émettre/demander les requêtes
+	httpClient := http.Client{
+		Timeout: time.Second * 2, // Timeout apres 2sec
+	}
+
+	// Création de la requête HTTP vers L'API avec initialisation de la methode HTTP, la route et le corps de la requête
+	req, errReq := http.NewRequest(http.MethodGet, urlApi, nil)
+	if errReq != nil {
+		fmt.Printf("api. - Erreur - NewRequest : %s\n\n", errReq.Error())
+	}
+
+	// Ajout d'une métadonnée dans le header
+	req.Header.Add("Authorization", "Bearer "+token)
+
+	//Paramètre de type query à inserer à la req GET
+	q := req.URL.Query()
+	q.Add("")
+	req.URL.RawQuery = q.Encode()
+
+	// Execution de la requête HTTP vars L'API
+	res, errResp := httpClient.Do(req)
+	if errResp != nil {
+		// Si une erreur est survenue lors de l'appel à l'API
+		fmt.Printf("api. - Erreur - Do : %s\n\n", errResp.Error())
+		return structure.Exemple{
+			Error: structure.Exemple_Error{
+				Status:  504,
+				Message: errResp.Error()}}
+	}
+
+	// Assurer la fermeture du corps de la réponse HTTP une fois la fonction terminée
+	defer res.Body.Close()
+
+	// Si le statut de la réponse HTTP n'est pas 200 OK (c'est à dire une erreur)
+	if res.StatusCode != http.StatusOK {
+		return structure.Exemple{
+			Error: structure.Exemple_Error{
+				Status:  res.StatusCode,
+				Message: http.StatusText(res.StatusCode),
+			},
+		}
+	}
+
+	// Lecture et récupération du corps de la requête HTTP
+	body, errBody := io.ReadAll(res.Body)
+	if errBody != nil {
+		fmt.Printf("api. - Erreur - ReadAll : %s\n\n", errBody.Error())
+	}
+
+	// Déclaration de la variable qui va contenir les données
+	var decodeData structure.Exemple
 
 	// Decodage des données en format JSON et ajout des donnée à la variable: decodeData
 	json.Unmarshal(body, &decodeData)
 
 	// Affichage des données
 	if decodeData.Error.Message != "" {
+		fmt.Printf("api. - Erreur - %s\n\n", decodeData.Error.Message)
 		return decodeData
 	} else {
-		fmt.Printf("album de %s récupéré : \n", id)
-		fmt.Println(decodeData)
+		fmt.Printf("api. - Succès -  brut: %v\n\n", decodeData)
 		return decodeData
 	}
 }
+*/

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/titre.css">
+    <title>Sudo FM - Titre</title>
+</head>
+
+<body>    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-container">
+                <a href="/"><img class="logo-img" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM"></a>
+                <p class="brand-name">Sudo FM</p>
+            </div>
+            <div class="nav-links">
+                <a href="/recherche">Recherche</a>
+                {{if .LogIn}}
+                <a href="/favoris">Favoris</a>
+                <a href="/deconnexion">Se déconnecter</a>
+                {{else}}
+                <a href="/connexion">Se connecter</a>
+                <a href="/inscription">S'inscrire</a>
+                {{end}}
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Contenu de la page titre -->
+        <div class="track-container">
+            <div class="track-header">
+                <img class="track-img" src="{{.TrackData.Images}}" alt="Image du titre {{.TrackData.TrackName}}">
+            </div>
+            
+            <div class="track-info-section">
+                <!-- <h1>Titre :</h1> --> <!-- Removed slightly redundant "Titre :" header to clean up UI, or kep inside if strictly required. User said "sans rien enlever". Putting it inside. -->
+                <h2 style="color:#aaa; font-size:1.2rem; margin-bottom:5px;">Titre :</h2>
+                
+                <h1>{{.TrackData.TrackName}}
+                    {{if .LogIn}}
+                        {{if .TrackData.IsFavoris}}
+                            <span><form action="" method="post" style="display:inline;">
+                                <input type="hidden" name="retirer_favoris" value="{{.TrackData.TrackId}}">
+                                <button type="submit" class="favoris-btn">★</button>
+                            </form></span>
+                        {{else}}
+                            <span>
+                                <span><form action="" method="post" style="display:inline;">
+                                <input type="hidden" name="ajout_favoris" value="{{.TrackData.TrackId}}">
+                                <button type="submit" class="favoris-btn">☆</button>
+                            </form></span>
+                        {{end}}
+                    {{end}}
+                </h1>
+                
+                <h4><a href="{{.TrackData.TrackURL}}" target="_blank">Liens vers Spotify</a></h4>
+                
+                <div class="track-meta">
+                    <p>Date de sortie : {{.TrackData.ReleaseDate}}</p>
+                    <p>Artistes : 
+                        {{range $index, $artist := .TrackData.Artists}}
+                            {{if $index}}, {{end}}<a href="/artiste/{{$artist.ArtistId}}">{{$artist.ArtistName}}</a>
+                        {{end}}
+                    </p>
+                    <p>Album : <a href="/album/{{.TrackData.AlbumId}}">{{.TrackData.AlbumName}}</a></p>
+                    <p>Durée : {{.TrackData.DurationFormated}} min</p>
+                </div>
+            </div>
+        </div>
+            
+        <!-- Intégration du player Spotify -->
+        <div class="spotify-embed">
+            <iframe data-testid="embed-iframe" 
+            src="https://open.spotify.com/embed/track/{{.TrackData.TrackId}}?utm_source=generator" 
+            width="100%" 
+            height="152" 
+            frameBorder="0" 
+            allowfullscreen="" 
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+            loading="lazy">
+            </iframe>
+        </div>
+    </main>
+</body>
+
+</html>

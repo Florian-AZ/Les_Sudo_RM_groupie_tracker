@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/">
+    <title>Sudo FM - Favoris</title>
+</head>
+
+
+<body>    
+    <nav>
+        <div>
+            <div>
+                <img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM">
+            </div>
+            <div>
+                <a href="/recherche">Recherche</a>
+                <a href="/deconnexion">Se déconnecter</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <h1>Favoris de {{.NomUtilisateur}}</h1>
+        <div>
+            {{if and (not .Favoris.Titres) (not .Favoris.Artistes) (not .Favoris.Albums)}}
+                <p>Vous n'avez pas encore ajouté de favoris.</p>
+                <p>Allez rechercher des titres, artistes ou albums et ajoutez-les à vos favoris.</p>
+                <a href="/recherche">Allons-y !</a>
+            {{end}}
+        </div>
+        {{if .Favoris.Titres}}
+            <div>
+                <h3>Titres :</h3>
+                <ul>
+                    {{range $i, $t := .Favoris.Titres}}
+                        <li>
+                            <img src="{{.Image}}" alt="Image du titre {{.Nom}}">
+                            <a href="/titre/{{$t.Id}}">
+                                {{$t.Nom}} {{if $t.Artistes}}par {{(index $t.Artistes 0).ArtistName}}{{else}}Artiste inconnu{{end}}- <a href="{{.URL}}">Lien Spotify</a>
+                               </a>
+                            </li>
+                    {{end}}
+                </ul>
+            </div>
+        {{end}}
+
+        {{if .Favoris.Artistes}}
+            <div>
+                <h3>Artistes :</h3>
+                <ul>
+                    {{range .Favoris.Artistes}}
+                        <li>
+                            <img src="{{.Image}}" alt="Image de l'artiste {{.Nom}}">
+                            <a href="/artiste/{{.Id}}">
+                                {{.Nom}} - <a href="{{.URL}}">Lien Spotify</a>
+                            </a>
+                        </li>
+                    {{end}}
+                </ul>
+            </div>
+        {{end}}
+
+        {{if .Favoris.Albums}}
+            <div>
+                <h3>Albums :</h3>
+                <ul>
+                    {{range .Favoris.Albums}}
+                        <li>
+                            <img src="{{.Image}}" alt="Image de l'album {{.Nom}}">
+                            <a href="/album/{{.Id}}">
+                                {{.Nom}} - {{if .ReleaseDate}}{{.ReleaseDate}}{{end}}{{if .Artists}} - {{(index .Artists 0).ArtistName}}{{else}}Artiste inconnu{{end}} - <a href="{{.URL}}">Lien Spotify</a>
+                            </a>
+                        </li>
+                    {{end}}
+                </ul>
+            </div>
+        {{end}}
+
+        <div>
+            {{if .Pagination.APrecedent}}
+                <a href="/recherche?search={{.SearchQuery}}&page={{.Pagination.PagePrec}}"><- Page précédente</a>
+            {{end}}
+            {{if .Pagination.APrecedent}}
+                <span>Page {{ .Pagination.Page }}</span>
+            {{else if .Pagination.ASuivant}}
+                <span>Page {{ .Pagination.Page }}</span>
+            {{end}}
+            {{if .Pagination.ASuivant}}
+                <a href="/recherche?search={{.SearchQuery}}&page={{.Pagination.PageSuiv}}">Page suivante -></a>
+            {{end}}
+        </div>
+    </main>
+</body>
+
+</html>

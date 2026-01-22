@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/">
+    <title>Sudo FM - Erreur {{.ErreurStatus}}</title>
+</head>
+
+<body>    
+    <nav>
+        <div>
+            <div>
+                <img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM">
+            </div>
+            <div>
+                <a href="/">Accueil</a>
+                {{if .LogIn}}
+                <a href="/favoris">Favoris</a>
+                <a href="/deconnexion">Se déconnecter</a>
+                {{else}}
+                <a href="/connexion">Se connecter</a>
+                <a href="/inscription">S'inscrire</a>
+                {{end}}
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <h1>Erreur {{.ErreurStatus}}</h1>
+        <p>{{.ErreurMessage}}</p>
+
+        <!-- Bouton pour revenir à la page précédente -->
+        <button onclick="window.history.back()">Retour</button>
+    </main>
+</body>
+
+</html>

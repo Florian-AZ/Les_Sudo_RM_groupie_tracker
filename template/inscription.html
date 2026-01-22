@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/inscription.css">
+    <title>Sudo FM - Inscription</title>
+</head>
+
+<body>    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-container">
+                <a href="/"><img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM" class="logo-img"></a>
+                <p class="brand-name">Sudo FM</p>
+            </div>
+            <div class="nav-links">
+                <a href="/recherche">Recherche</a>
+                <a href="/Accueil">Accueil</a>
+            </div>
+        </div>
+    </nav>
+   
+    <main>
+        <div class="inscription_img">
+            <div class="main-content">
+                <h1>Inscription</h1>
+                <div>
+                    {{if .Erreur}}
+                        <p style="color:red;">Erreur lors de l'inscription : {{.Erreur}}</p>
+                    {{end}}
+                    <form method="POST" action="/inscription">
+                        <div>
+                            <!-- for="utilisateur" → lié à l'id="utilisateur". Cliquer sur le label place le curseur dans le champ -->
+                            <label for="utilisateur">Nom d'utilisateur :</label><br>
+                            <input type="text" id="utilisateur" name="utilisateur" required>
+                        </div>
+                        <div>
+                            <label for="MdP">Mot de passe :</label><br>
+                            <input type="password" id="MdP" name="MdP" required>
+                        </div>
+                        <div>
+                            <label for="MdPConf">Confirmer le mot de passe :</label><br>
+                            <input type="password" id="MdPConf" name="MdPConf" required>
+                        </div>
+                        <br><button class='button'type="submit">S'inscrire</button>
+                    </form>
+                </div>
+            </div>
+        </div>        
+    </main>
+</body>
+
+</html>

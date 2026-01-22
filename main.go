@@ -8,9 +8,9 @@ import (
 
 func main() {
 	mux := router.New()
-	fmt.Println("🚀 Serveur démarré sur http://localhost:8080")
+	fmt.Printf("main - succés - 🚀 Serveur démarré sur http://localhost:8080\n\n")
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
-		fmt.Println("Erreur serveur :", err)
+		fmt.Printf("main - Erreur - serveur : %s\n\n", err)
 	}
 }

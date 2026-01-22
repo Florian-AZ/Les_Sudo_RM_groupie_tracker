@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/connexion.css">
+    <title>Sudo FM - Connexion</title>
+</head>
+
+<body>    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-container">
+                <a href="/"><img width="300" src="/assets/img/Sudo-FM_Logo.png" alt="Logo Sudo FM" class="logo-img"></a>
+                <p class="brand-name">Sudo FM</p>
+            </div>
+            <div class="nav-links">
+                <a href="/recherche">Recherche</a>
+                <a href="/Accueil">Accueil</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="connexion_img">
+            <div class="main-content">
+                <h1>Connexion</h1>
+                <div>
+                    {{if .Erreur}}
+                        <p style="color:red;">{{.Erreur}}</p>
+                    {{end}}
+                    <form method="POST" action="/connexion">
+                        <div >
+                            <!-- for="utilisateur" → lié à l'id="utilisateur". Cliquer sur le label place le curseur dans le champ -->
+                            <label for="utilisateur">Nom d'utilisateur :</label><br>
+                            <input type="text" id="utilisateur" name="utilisateur" required>
+                        </div>
+                        <div>
+                            <label for="MdP">Mot de passe :</label><br>
+                            <input type="password" id="MdP" name="MdP" required>
+                        </div>
+                    <br><button class="button" type="submit">Se connecter</button>
+                    </form>
+
+                    <p>S'inscrire ? <a href="/inscription">Cliquez ici</a></p>
+                </div>
+            </div>
+        </div>        
+    </main>
+</body>
+
+</html>
